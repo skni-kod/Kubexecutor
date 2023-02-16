@@ -1,13 +1,18 @@
 from fastapi import FastAPI
+from pydantic.main import BaseModel
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+class Request(BaseModel):
+    code: str
+    language: str
+
+    def __str__(self):
+        return self.code
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+@app.post("/execute")
+async def say_hello(request: Request):
+    print(request)
+    return request
