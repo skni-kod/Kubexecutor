@@ -5,6 +5,6 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "code": "999",
+  "code": "Y2xhc3MgTXlDbGFzczoKICAgIGRlZiBfX2luaXRfXyhzZWxmLCB2YWx1ZSk6CiAgICAgICAgc2VsZi52YWx1ZSA9IHZhbHVlCgogICAgZGVmIHNxdWFyZShzZWxmKToKICAgICAgICByZXR1cm4gc2VsZi52YWx1ZSAqKiAyCgpkZWYgYWRkX251bWJlcnMoYSwgYik6CiAgICByZXR1cm4gYSArIGIKCm9iaiA9IE15Q2xhc3MoNSkKcHJpbnQob2JqLnNxdWFyZSgpKQoKcmVzdWx0ID0gYWRkX251bWJlcnMoMywgNCk===",
   "language": "python"
 }
