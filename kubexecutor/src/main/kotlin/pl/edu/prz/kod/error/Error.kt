@@ -1,4 +1,4 @@
-package pl.edu.prz.kod
+package pl.edu.prz.kod.error
 
 import java.util.concurrent.TimeUnit
 

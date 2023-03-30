@@ -8,6 +8,7 @@ import pl.edu.prz.kod.domain.CodeRequest
 import pl.edu.prz.kod.domain.Language
 import pl.edu.prz.kod.executor.PythonExecutor
 import java.util.concurrent.TimeUnit
+import kotlin.system.exitProcess
 
 fun Route.executorRouting() {
     route("/execute") {

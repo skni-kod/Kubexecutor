@@ -1,7 +1,7 @@
 package pl.edu.prz.kod.domain
 
 import kotlinx.serialization.Serializable
-import pl.edu.prz.kod.LanguageNotImplementedError
+import pl.edu.prz.kod.error.LanguageNotImplementedError
 import pl.edu.prz.kod.b64Decoder
 
 @Serializable
