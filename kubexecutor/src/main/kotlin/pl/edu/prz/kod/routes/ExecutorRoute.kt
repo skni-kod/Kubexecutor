@@ -16,7 +16,7 @@ fun Route.executorRouting() {
             val code = codeRequest.decode()
 
             val result = when(code.language) {
-                Language.Python -> PythonExecutor().execute(code.textValue, 5, TimeUnit.SECONDS)
+                Language.PYTHON -> PythonExecutor().execute(code.textValue, 5, TimeUnit.SECONDS)
             }
 
             call.respond(result)

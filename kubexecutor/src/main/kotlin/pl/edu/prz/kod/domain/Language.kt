@@ -1,16 +1,10 @@
 package pl.edu.prz.kod.domain
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-sealed class Language {
-    @Serializable
-    object Python : Language()
+enum class Language(val value: String) {
+    PYTHON("python");
 
     companion object {
-        fun of(language: String): Language = when (language) {
-            "Python" -> Python
-            else -> throw NotImplementedError()
-        }
+        infix fun from(value: String): Language? = Language.values().firstOrNull { it.value == value.lowercase() }
     }
 }
+

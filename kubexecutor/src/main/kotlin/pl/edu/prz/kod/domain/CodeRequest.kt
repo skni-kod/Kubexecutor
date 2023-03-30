@@ -1,9 +1,8 @@
 package pl.edu.prz.kod.domain
 
 import kotlinx.serialization.Serializable
-import java.util.*
-
-val b64Decoder = Base64.getDecoder()
+import pl.edu.prz.kod.LanguageNotImplementedError
+import pl.edu.prz.kod.b64Decoder
 
 @Serializable
 data class CodeRequest(
@@ -12,7 +11,7 @@ data class CodeRequest(
 ) {
     fun decode(): Code = Code(
         textValue = String(b64Decoder.decode(base64Code)),
-        language = Language.of(language)
+        language = Language.from(language) ?: throw LanguageNotImplementedError("Language [${language}] not implemented!")
     )
 }
 
