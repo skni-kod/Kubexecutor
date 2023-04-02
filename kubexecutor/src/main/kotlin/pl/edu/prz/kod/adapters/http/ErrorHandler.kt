@@ -1,12 +1,12 @@
-package pl.edu.prz.kod.handler
+package pl.edu.prz.kod.adapters.http
 
 import io.ktor.http.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
-import pl.edu.prz.kod.error.CompilationFailedError
-import pl.edu.prz.kod.error.LanguageNotImplementedError
-import pl.edu.prz.kod.error.ProcessTimedOutError
+import pl.edu.prz.kod.domain.LanguageNotImplementedError
+import pl.edu.prz.kod.domain.CompilationFailedError
+import pl.edu.prz.kod.domain.ProcessTimedOutError
 
 fun StatusPagesConfig.handleErrors() {
     exception<RequestValidationException> { call, cause ->

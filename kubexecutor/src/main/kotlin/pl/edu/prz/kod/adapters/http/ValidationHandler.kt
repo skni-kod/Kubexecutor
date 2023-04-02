@@ -1,7 +1,7 @@
-package pl.edu.prz.kod.handler
+package pl.edu.prz.kod.adapters.http
 
 import io.ktor.server.plugins.requestvalidation.*
-import pl.edu.prz.kod.domain.CodeRequest
+import pl.edu.prz.kod.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.domain.Language
 
 fun RequestValidationConfig.validateRequest() {
