@@ -6,9 +6,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import pl.edu.prz.kod.domain.CodeRequest
 import pl.edu.prz.kod.domain.Language
+import pl.edu.prz.kod.executor.JavaExecutor
 import pl.edu.prz.kod.executor.PythonExecutor
-import java.util.concurrent.TimeUnit
-import kotlin.system.exitProcess
 
 fun Route.executorRouting() {
     route("/execute") {
@@ -17,7 +16,8 @@ fun Route.executorRouting() {
             val code = codeRequest.decode()
 
             val result = when(code.language) {
-                Language.PYTHON -> PythonExecutor().execute(code.textValue, 5, TimeUnit.SECONDS)
+                Language.PYTHON -> PythonExecutor().execute(code.textValue)
+                Language.JAVA -> JavaExecutor().execute(code.textValue)
             }
 
             call.respond(result)
