@@ -12,7 +12,7 @@ sealed class AbstractExecutor(language: Language) {
 
     abstract fun execute(code: String): ExecutionResult
 
-    fun runSystemCommand(command: String, workDir: File? = null): Process {
+    protected fun runSystemCommand(command: String, workDir: File = File("/app")): Process {
         val systemCommand = listOf("bash", "-c", command)
         val process = ProcessBuilder(systemCommand)
                 .directory(workDir)

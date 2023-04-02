@@ -18,10 +18,14 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
         runDir.mkdirs()
 
         val classNameMatcher = Pattern.compile("class\\s+([^\\s{]+)[\\s{]").matcher(code)
-        var javaClassName = "Main"
-        if (classNameMatcher.find()) {
-            javaClassName = classNameMatcher.group(1)
-        }
+        val javaClassName = if (classNameMatcher.find()) classNameMatcher.group(1) else "Main"
+
+        val packageNameMatcher = Pattern.compile("^\\s*package\\s+([^;]+);").matcher(code)
+        val javaPackageName =
+                if (packageNameMatcher.find())
+                    packageNameMatcher.group(1)
+                            .replace(Regex("\\s"), "") + '.'
+                else ""
 
         val javaFile = srcDir.resolve("$javaClassName.java")
         javaFile.createNewFile()
@@ -32,7 +36,7 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
             throw CompilationFailedError(compilationProcess.errorStream.bufferedReader().readText())
         }
 
-        val runProcess = runSystemCommand("java -classpath $buildDirPath $javaClassName", runDir)
+        val runProcess = runSystemCommand("java -classpath $buildDirPath $javaPackageName$javaClassName", runDir)
         return ExecutionResult(
                 stdout = runProcess.inputStream.bufferedReader().readText(),
                 stdErr = runProcess.errorStream.bufferedReader().readText(),
