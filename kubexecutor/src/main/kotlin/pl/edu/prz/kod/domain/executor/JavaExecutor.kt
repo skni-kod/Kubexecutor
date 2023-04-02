@@ -1,8 +1,8 @@
-package pl.edu.prz.kod.executor
+package pl.edu.prz.kod.domain.executor
 
+import pl.edu.prz.kod.domain.CompilationFailedError
 import pl.edu.prz.kod.domain.ExecutionResult
 import pl.edu.prz.kod.domain.Language
-import pl.edu.prz.kod.error.CompilationFailedError
 import java.io.File
 import java.util.regex.Pattern
 

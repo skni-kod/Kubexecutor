@@ -1,8 +1,8 @@
-package pl.edu.prz.kod.executor
+package pl.edu.prz.kod.domain.executor
 
 import pl.edu.prz.kod.domain.ExecutionResult
 import pl.edu.prz.kod.domain.Language
-import pl.edu.prz.kod.error.ProcessTimedOutError
+import pl.edu.prz.kod.domain.ProcessTimedOutError
 import java.io.File
 import java.util.concurrent.TimeUnit
 

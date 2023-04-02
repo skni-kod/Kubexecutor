@@ -1,4 +1,4 @@
-package pl.edu.prz.kod
+package pl.edu.prz.kod.application
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -10,13 +10,10 @@ import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import org.slf4j.event.Level
-import pl.edu.prz.kod.domain.CodeRequest
-import pl.edu.prz.kod.domain.Language
-import pl.edu.prz.kod.handler.handleErrors
-import pl.edu.prz.kod.handler.validateRequest
-import java.util.*
-
-val b64Decoder = Base64.getDecoder()
+import pl.edu.prz.kod.adapters.http.HttpHandler
+import pl.edu.prz.kod.adapters.http.handleErrors
+import pl.edu.prz.kod.adapters.http.validateRequest
+import pl.edu.prz.kod.domain.executor.ExecutorOrchestrator
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module, configure = {
@@ -41,5 +38,5 @@ fun Application.module() {
     install(RequestValidation) {
         validateRequest()
     }
-    configureRouting()
+    HttpHandler(this, ExecutorOrchestrator())
 }

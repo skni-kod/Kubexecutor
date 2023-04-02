@@ -1,4 +1,4 @@
-package pl.edu.prz.kod.executor
+package pl.edu.prz.kod.domain.executor
 
 import pl.edu.prz.kod.domain.ExecutionResult
 import pl.edu.prz.kod.domain.Language
