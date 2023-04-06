@@ -9,11 +9,14 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
+import io.ktor.server.routing.*
+import org.koin.ktor.plugin.Koin
+import org.koin.logger.slf4jLogger
 import org.slf4j.event.Level
-import pl.edu.prz.kod.adapters.http.HttpHandler
+import pl.edu.prz.kod.adapters.http.executor
 import pl.edu.prz.kod.adapters.http.handleErrors
 import pl.edu.prz.kod.adapters.http.validateRequest
-import pl.edu.prz.kod.domain.executor.ExecutorOrchestrator
+import pl.edu.prz.kod.domain.domainModule
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module, configure = {
@@ -29,6 +32,13 @@ fun Application.module() {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
     }
+    install(Koin) {
+        modules(
+            applicationModule,
+            domainModule
+        )
+        slf4jLogger()
+    }
     install(ContentNegotiation) {
         json()
     }
@@ -38,5 +48,7 @@ fun Application.module() {
     install(RequestValidation) {
         validateRequest()
     }
-    HttpHandler(this, ExecutorOrchestrator())
+    routing {
+        executor()
+    }
 }
