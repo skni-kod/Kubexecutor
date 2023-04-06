@@ -5,6 +5,5 @@ To build:
 
 To build container image:
 ```shell
-VERSION=0.1
-docker build -t kubexecutor:$VERSION -f Dockerfile .
+ docker build -t kubexecutor:$(git rev-parse --short HEAD) -t kubexecutor:latest .
 ```
