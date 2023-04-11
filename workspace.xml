@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="df557769-0065-41c7-8ee2-46f1257812d5" name="Changes" comment="K8s manifest, readme update" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand />
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Data Class" />
+        <option value="Kotlin Class" />
+        <option value="Kotlin File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="master" />
+      </map>
+    </option>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2NsTgXpTjpP5xky1ZHsBr0YnZJi" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;ktor.last.update.timestamp&quot;: &quot;1680809842982&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/mherda/github_repos/Kubexecutor/kubexecutor/src/main/kotlin/pl/edu/prz/kod/adapters&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/kotlin/pl/edu/prz/kod/adapters" />
+      <recent name="$PROJECT_DIR$/src/main/kotlin/pl/edu/prz/kod/domain" />
+      <recent name="$PROJECT_DIR$/src/main/kotlin/pl/edu/prz/kod/domain/executor" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/kotlin/pl/edu/prz/kod/adapters/http" />
+      <recent name="$PROJECT_DIR$/src/main/kotlin/pl/edu/prz/kod/domain" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="pl.edu.prz.kod.domain.executor" />
+      <recent name="pl.edu.prz.kod.adapters.dto" />
+    </key>
+    <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="pl.edu.prz.kod.domain" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="ApplicationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pl.edu.prz.kod.application.ApplicationKt" />
+      <module name="kubexecutor.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Kotlin.ApplicationKt" />
+        <item itemvalue="Kotlin.ApplicationKt" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="df557769-0065-41c7-8ee2-46f1257812d5" name="Changes" comment="" />
+      <created>1680451901829</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1680451901829</updated>
+      <workItem from="1680451902958" duration="6780000" />
+      <workItem from="1680523449150" duration="3788000" />
+      <workItem from="1680629913828" duration="717000" />
+      <workItem from="1680809824046" duration="146000" />
+      <workItem from="1680815142315" duration="832000" />
+      <workItem from="1680816098061" duration="166000" />
+      <workItem from="1681238890839" duration="55000" />
+    </task>
+    <task id="LOCAL-00001" summary="Change project architecture to hexagon based">
+      <created>1680457448391</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1680457448391</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Change project architecture to hexagon based">
+      <created>1680457955354</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1680457955354</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Fix main class path">
+      <created>1680458526937</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1680458526937</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Extend gitignore">
+      <created>1680458657675</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1680458657675</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Add koin dependency injection library">
+      <created>1680526069181</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1680526069181</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Review fixes">
+      <created>1680809944790</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1680809944790</updated>
+    </task>
+    <task id="LOCAL-00007" summary="K8s manifest, readme update">
+      <created>1680816248847</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1680816248847</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Change project architecture to hexagon based" />
+    <MESSAGE value="Fix main class path" />
+    <MESSAGE value="Extend gitignore" />
+    <MESSAGE value="Add koin dependency injection library" />
+    <MESSAGE value="Review fixes" />
+    <MESSAGE value="K8s manifest, readme update" />
+    <option name="LAST_COMMIT_MESSAGE" value="K8s manifest, readme update" />
+  </component>
+</project>
