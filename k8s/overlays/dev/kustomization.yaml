@@ -10,4 +10,4 @@ images:
 
 replicas:
   - name: kubexecutor
-    count: 3
+    count: 2

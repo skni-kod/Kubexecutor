@@ -34,3 +34,17 @@ Source:
 ```shell
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
+
+## Deploying my version of Kubexecutor on dev env
+
+In order to run my version of Kubexecutor on dev cluster:
+1. Create a feature branch with desired changes.
+2. Modify image tag version in `k8s/overlays/dev/kustomization.yaml`
+3. Run Build & push Github workflow with version specified in the step above.
+4. Connect to ArgoCD, enter kubexecutor app -> app details -> edit.
+5. Change *Target Revision* to name of Your feature branch, i.e. `feature/test-deploy-from-branch`.
+6. Sync the state of the application in ArgoCD.
+
+After testing the changes:
+1. Create a pull request with the changes and merge it.
+2. Change *Target Revision* in ArgoCD to `HEAD`.
