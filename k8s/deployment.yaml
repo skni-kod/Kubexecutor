@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kubexecutor
-  labels:
-    app: kubexecutor
 spec:
   replicas: 5
   selector:
@@ -19,16 +17,3 @@ spec:
           image: musiek/kubexecutor:latest
           ports:
             - containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kubexecutor-svc
-  labels:
-    app: kubexecutor
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 8080
-  selector:
-    app: kubexecutor
