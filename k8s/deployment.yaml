@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: kubexecutor
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       app: kubexecutor
@@ -12,6 +12,7 @@ spec:
       labels:
         app: kubexecutor
     spec:
+      runtimeClassName: kata-dragonball
       containers:
         - name: kubexecutor
           image: musiek/kubexecutor:latest
