@@ -7,3 +7,7 @@ resources:
 images:
   - name: musiek/kubexecutor
     newTag: '0.1'
+
+replicas:
+  - name: kubexecutor
+    count: 3
