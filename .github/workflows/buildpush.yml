@@ -20,14 +20,13 @@ jobs:
       run: ./gradlew buildFatJar
 
     - name: Build Docker image
-      run: docker build -t kubexecutor:latest .
+      run: docker build -t musiek/kubexecutor:${{ github.sha }} .
 
     - name: Log in to Malwina Hub
       uses: docker/login-action@v1
       with:
-        registry: ${{ secrets.DOCKER_URL }}
-        username: ${{ secrets.DOCKER_LOGIN }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: ${{ secrets.DOCKERHUB_LOGIN }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Push Docker image
-      run: docker push ${{ secrets.DOCKER_URL }}/library/kubexecutor:lates
+      run: docker push musiek/kubexecutor:${{ github.sha }}
