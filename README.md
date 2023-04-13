@@ -29,3 +29,8 @@ Source:
 * https://docs.k3s.io/quick-start
 * https://github.com/kata-containers/kata-containers/blob/stable-3.1/tools/packaging/kata-deploy/README.md
   
+## Accessing ArgoCD
+
+```shell
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
