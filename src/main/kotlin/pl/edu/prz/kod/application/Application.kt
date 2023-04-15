@@ -4,15 +4,12 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import org.slf4j.event.Level
 import pl.edu.prz.kod.adapters.http.executor
 import pl.edu.prz.kod.adapters.http.handleErrors
 import pl.edu.prz.kod.adapters.http.validateRequest
@@ -28,10 +25,6 @@ fun main() {
 }
 
 fun Application.module() {
-    install(CallLogging) {
-        level = Level.INFO
-        filter { call -> call.request.path().startsWith("/") }
-    }
     install(Koin) {
         modules(
             applicationModule,
