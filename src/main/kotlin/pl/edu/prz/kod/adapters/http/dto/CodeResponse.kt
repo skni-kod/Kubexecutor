@@ -8,7 +8,7 @@ data class CodeResponse(
     val exitCode: Int
 )
 
-fun ExecutionResult.encode(): CodeResponse = CodeResponse(
+fun ExecutionResult.Success.encode(): CodeResponse = CodeResponse(
     stdout = stdout,
     stdErr = stdErr,
     exitCode = exitCode
