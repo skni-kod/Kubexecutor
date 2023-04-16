@@ -1,5 +1,8 @@
 package pl.edu.prz.kod.application
 
+import org.http4k.contract.openapi.ApiInfo
+import org.http4k.contract.openapi.v3.OpenApi3
+import org.http4k.format.Jackson
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
@@ -16,29 +19,8 @@ fun main() {
     }
 
     HttpHandler()
-        .app
+        .handler
         .asServer(Netty(port = 8080))
         .start()
-}
 
-//fun Application.module() {
-//    install(Koin) {
-//        modules(
-//            applicationModule,
-//            domainModule
-//        )
-//        slf4jLogger()
-//    }
-//    install(ContentNegotiation) {
-//        json()
-//    }
-//    install(StatusPages) {
-//        handleErrors()
-//    }
-//    install(RequestValidation) {
-//        validateRequest()
-//    }
-//    routing {
-//        executor()
-//    }
-//}
+}

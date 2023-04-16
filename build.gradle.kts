@@ -31,6 +31,7 @@ dependencies {
     implementation("org.http4k:http4k-server-netty:$http4k_version")
     implementation("org.http4k:http4k-format-jackson:$http4k_version")
     implementation("org.http4k:http4k-format-core:$http4k_version")
+    implementation("org.http4k:http4k-contract:$http4k_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.github.microutils:kotlin-logging:$kotlin_logging_version")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jackson_version")
