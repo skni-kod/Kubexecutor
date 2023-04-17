@@ -6,13 +6,13 @@ sealed class ExecutionResult {
     data class Success(val stdout: String, val stdErr: String, val exitCode: Int) :
         ExecutionResult()
 
-    sealed class Failure: ExecutionResult() {
-        class ProcessTimedOutError(timeout: Long, timeoutUnit: TimeUnit) : Failure() {
-            val message = "Code request timed out after $timeout $timeoutUnit"
-        }
+    sealed class Failure(message: String) : ExecutionResult() {
+        val message: String = message
 
-        class CompilationFailedError(error: String): Failure() {
-            val message = "Compilation error occurred: $error"
-        }
+        class ProcessTimedOutError(timeout: Long, timeoutUnit: TimeUnit) :
+            Failure("Code request timed out after $timeout $timeoutUnit")
+
+        class CompilationFailedError(error: String) :
+            Failure("Compilation error occurred: $error")
     }
 }
