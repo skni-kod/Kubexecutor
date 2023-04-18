@@ -21,8 +21,8 @@ class HttpHandler {
     private val base64Decoder by inject<Base64.Decoder>(Base64.Decoder::class.java)
     private val executorOrchestrator by inject<ExecutorOrchestratorPort>(ExecutorOrchestratorPort::class.java)
 
-    val requestLens = Jackson.autoBody<CodeRequest>().toLens()
-    val responseLens = Jackson.autoBody<CodeResponse>().toLens()
+    private val requestLens = Jackson.autoBody<CodeRequest>().toLens()
+    private val responseLens = Jackson.autoBody<CodeResponse>().toLens()
 
     private val routesContract = contract {
         renderer = OpenApi2(ApiInfo("Kubexecutor API", "v1.0"), Jackson)
