@@ -16,7 +16,7 @@ fun main() {
     }
 
     HttpHandler()
-        .handlerWithEvents
+        .tracingHandler
         .asServer(Netty(port = 8080))
         .start()
 

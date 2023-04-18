@@ -24,28 +24,32 @@ class HttpHandler {
     val requestLens = Jackson.autoBody<CodeRequest>().toLens()
     val responseLens = Jackson.autoBody<CodeResponse>().toLens()
 
-    private val contract = contract {
+    private val routesContract = contract {
         renderer = OpenApi2(ApiInfo("Kubexecutor API", "v1.0"), Jackson)
         descriptionPath = "/openapi.json"
         routes += executeRoute()
     }
 
-    val handler: RoutingHttpHandler = ServerFilters.CatchAll { exception ->
-        println(exception)
+    val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters.CatchAll { exception ->
+        logEvent(
+            ExceptionEvent(exception)
+        )
         handleExceptions(exception)
-    }.then(routes(contract))
+    }.then(routes(routesContract))
 
-    val handlerWithEvents =
+    val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
-            requestEvent(
-                IncomingHttpRequest(
+            logEvent(
+                IncomingHttpRequestEvent(
                     uri = it.request.uri,
                     status = it.response.status.code,
                     duration = it.duration.toMillis()
                 )
             )
-        }.then(handler)
+        }.then(exceptionCatchingHandler)
 
+    val tracingHandler = ServerFilters.RequestTracing()
+        .then(eventsHandler)
 
     private fun executeRoute(): ContractRoute {
         val spec = "/execute" meta {
@@ -68,15 +72,23 @@ class HttpHandler {
 
         fun execute() = { request: Request ->
             val codeRequest = requestLens.extract(request)
-            requestEvent(
-                ReceivedCodeRequest(
+            logEvent(
+                ReceivedCodeRequestEvent(
                     code = codeRequest.base64Code,
                     language = codeRequest.language
                 )
             )
-            val decodingResult = codeRequest.decode(base64Decoder)
-            when (decodingResult) {
-                is DecodingResult.Successful -> executeDecoded(decodingResult.code)
+            when (val decodingResult = codeRequest.decode(base64Decoder)) {
+                is DecodingResult.Successful -> {
+                    val code = decodingResult.code
+                    logEvent(
+                        DecodedCodeEvent(
+                            code = code.textValue,
+                            language = code.language
+                        )
+                    )
+                    executeDecoded(code)
+                }
                 is DecodingResult.Failure -> handleDecodingErrors(decodingResult)
             }
         }
@@ -88,8 +100,8 @@ class HttpHandler {
         val result = executorOrchestrator.execute(code)
         return when (result) {
             is ExecutionResult.Success -> {
-                requestEvent(
-                    ExecutionSuccessful(
+                logEvent(
+                    ExecutionSuccessfulEvent(
                         stdout = result.stdout,
                         stdErr = result.stdErr,
                         exitCode = result.exitCode

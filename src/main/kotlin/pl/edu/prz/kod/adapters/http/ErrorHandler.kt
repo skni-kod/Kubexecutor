@@ -8,16 +8,16 @@ import pl.edu.prz.kod.domain.ProcessTimedOutError
 
 fun handleDecodingErrors(result: DecodingResult.Failure): Response = when (result) {
     is DecodingResult.Failure.LanguageNotImplementedResult -> {
-        requestEvent(
-            LanguageNotImplemented(result.language)
+        logEvent(
+            LanguageNotImplementedEvent(result.language)
         )
         languageNotImplementedResponse(result.language)
     }
 }
 
 fun handleExecutionErrors(result: ExecutionResult.Failure): Response {
-    requestEvent(
-        ExecutionFailed(result.message)
+    logEvent(
+        ExecutionFailedEvent(result.message)
     )
     return when (result) {
         is ExecutionResult.Failure.ProcessTimedOutError -> Response(Status.REQUEST_TIMEOUT)
