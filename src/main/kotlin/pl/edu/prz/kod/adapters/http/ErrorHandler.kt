@@ -5,7 +5,7 @@ import org.http4k.core.Status
 import pl.edu.prz.kod.adapters.http.dto.DecodingResult
 import pl.edu.prz.kod.domain.ExecutionResult
 
-fun handleDecodingErrors(result: DecodingResult.Failure): Response = when (result) {
+fun handleDecodingError(result: DecodingResult.Failure): Response = when (result) {
     is DecodingResult.Failure.LanguageNotImplementedResult -> {
         logEvent(
             LanguageNotImplementedEvent(result.language)
@@ -14,7 +14,7 @@ fun handleDecodingErrors(result: DecodingResult.Failure): Response = when (resul
     }
 }
 
-fun handleExecutionErrors(result: ExecutionResult.Failure): Response {
+fun handleExecutionError(result: ExecutionResult.Failure): Response {
     logEvent(
         ExecutionFailedEvent(result.message)
     )
@@ -26,7 +26,7 @@ fun handleExecutionErrors(result: ExecutionResult.Failure): Response {
 }
 
 //    Handle future exceptions here
-fun handleExceptions(throwable: Throwable): Response = when (throwable) {
+fun handleException(throwable: Throwable): Response = when (throwable) {
     else -> Response(Status.INTERNAL_SERVER_ERROR)
 }
 

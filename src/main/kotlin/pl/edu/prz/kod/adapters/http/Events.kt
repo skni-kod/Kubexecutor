@@ -14,11 +14,11 @@ val logEvent =
         .then(EventFilters.AddZipkinTraces())
         .then(AutoMarshallingEvents(Jackson))
 
-data class IncomingHttpRequestEvent(val uri: Uri, val status: Int, val duration: Long) : Event
+data class HttpRequestEvent(val uri: Uri, val status: Int, val duration: Long) : Event
 data class ReceivedCodeRequestEvent(val code: String, val language: String): Event
 data class DecodedCodeEvent(val code: String, val language: Language): Event
 data class ExecutionSuccessfulEvent(val stdout: String, val stdErr: String, val exitCode: Int): Event
 data class ExecutionFailedEvent(val message: String): Event
 data class LanguageNotImplementedEvent(val language: String): Event
-
 data class ExceptionEvent(val exception: Throwable): Event
+data class ApplicationStartedEvent(val message: String = "Application started"): Event

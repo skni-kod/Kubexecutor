@@ -30,17 +30,17 @@ class HttpHandler {
         routes += executeRoute()
     }
 
-    val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters.CatchAll { exception ->
+    private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters.CatchAll { exception ->
         logEvent(
             ExceptionEvent(exception)
         )
-        handleExceptions(exception)
+        handleException(exception)
     }.then(routes(routesContract))
 
-    val eventsHandler =
+    private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
             logEvent(
-                IncomingHttpRequestEvent(
+                HttpRequestEvent(
                     uri = it.request.uri,
                     status = it.response.status.code,
                     duration = it.duration.toMillis()
@@ -89,7 +89,7 @@ class HttpHandler {
                     )
                     executeDecoded(code)
                 }
-                is DecodingResult.Failure -> handleDecodingErrors(decodingResult)
+                is DecodingResult.Failure -> handleDecodingError(decodingResult)
             }
         }
 
@@ -97,8 +97,7 @@ class HttpHandler {
     }
 
     private fun executeDecoded(code: Code): Response {
-        val result = executorOrchestrator.execute(code)
-        return when (result) {
+        return when (val result = executorOrchestrator.execute(code)) {
             is ExecutionResult.Success -> {
                 logEvent(
                     ExecutionSuccessfulEvent(
@@ -110,7 +109,7 @@ class HttpHandler {
                 responseLens.inject(result.encode(), Response(OK))
             }
 
-            is ExecutionResult.Failure -> handleExecutionErrors(result)
+            is ExecutionResult.Failure -> handleExecutionError(result)
         }
     }
 
