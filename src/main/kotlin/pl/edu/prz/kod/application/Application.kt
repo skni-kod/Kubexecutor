@@ -1,54 +1,27 @@
 package pl.edu.prz.kod.application
 
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.requestvalidation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.request.*
-import io.ktor.server.routing.*
-import org.koin.ktor.plugin.Koin
-import org.koin.logger.slf4jLogger
-import org.slf4j.event.Level
-import pl.edu.prz.kod.adapters.http.executor
-import pl.edu.prz.kod.adapters.http.handleErrors
-import pl.edu.prz.kod.adapters.http.validateRequest
+import org.http4k.server.asServer
+import org.koin.core.context.startKoin
+import pl.edu.prz.kod.adapters.http.ApplicationStartedEvent
+import pl.edu.prz.kod.adapters.http.HttpHandler
+import pl.edu.prz.kod.adapters.http.logEvent
 import pl.edu.prz.kod.domain.domainModule
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module, configure = {
-        connectionGroupSize = 1
-        workerGroupSize = 1
-        callGroupSize = 1
-    })
-        .start(wait = true)
-}
-
-fun Application.module() {
-    install(CallLogging) {
-        level = Level.INFO
-        filter { call -> call.request.path().startsWith("/") }
-    }
-    install(Koin) {
+    startKoin {
         modules(
             applicationModule,
-            domainModule
+            domainModule,
+
         )
-        slf4jLogger()
     }
-    install(ContentNegotiation) {
-        json()
-    }
-    install(StatusPages) {
-        handleErrors()
-    }
-    install(RequestValidation) {
-        validateRequest()
-    }
-    routing {
-        executor()
-    }
+
+    HttpHandler()
+        .tracingHandler
+        .asServer(SingleThreadedNetty(port = 8080))
+        .start()
+
+    logEvent (
+        ApplicationStartedEvent()
+    )
 }

@@ -20,7 +20,7 @@ jobs:
         java-version: '17'
 
     - name: Build with Gradle
-      run: ./gradlew buildFatJar
+      run: ./gradlew jar
 
     - name: Build Docker image
       run: docker build -t musiek/kubexecutor:${{ github.event.inputs.imageTag }} -t musiek/kubexecutor:latest .

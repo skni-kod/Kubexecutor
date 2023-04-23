@@ -1,24 +1,34 @@
 package pl.edu.prz.kod.adapters.http
 
-import io.ktor.http.*
-import io.ktor.server.plugins.requestvalidation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
-import pl.edu.prz.kod.domain.LanguageNotImplementedError
-import pl.edu.prz.kod.domain.CompilationFailedError
-import pl.edu.prz.kod.domain.ProcessTimedOutError
+import org.http4k.core.Response
+import org.http4k.core.Status
+import pl.edu.prz.kod.adapters.http.dto.DecodingResult
+import pl.edu.prz.kod.domain.ExecutionResult
 
-fun StatusPagesConfig.handleErrors() {
-    exception<RequestValidationException> { call, cause ->
-        call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
-    }
-    exception<LanguageNotImplementedError> { call, cause ->
-        call.respondText(text = "501: ${cause.message}", status = HttpStatusCode.NotImplemented)
-    }
-    exception<ProcessTimedOutError> { call, cause ->
-        call.respondText(text = "408: ${cause.message}", status = HttpStatusCode.RequestTimeout)
-    }
-    exception<CompilationFailedError> { call, cause ->
-        call.respondText(text = "400: ${cause.message}", status = HttpStatusCode.BadRequest)
+fun handleDecodingError(result: DecodingResult.Failure): Response = when (result) {
+    is DecodingResult.Failure.LanguageNotImplementedResult -> {
+        logEvent(
+            LanguageNotImplementedEvent(result.language)
+        )
+        languageNotImplementedResponse(result.language)
     }
 }
+
+fun handleExecutionError(result: ExecutionResult.Failure): Response {
+    logEvent(
+        ExecutionFailedEvent(result.message)
+    )
+    return when (result) {
+        is ExecutionResult.Failure.ProcessTimedOutError -> Response(Status.REQUEST_TIMEOUT).body(result.message)
+        is ExecutionResult.Failure.CompilationTimedOutError -> Response(Status.REQUEST_TIMEOUT).body(result.message)
+        is ExecutionResult.Failure.CompilationFailedError -> Response(Status.BAD_REQUEST).body(result.message)
+    }
+}
+
+//    Handle future exceptions here
+fun handleException(throwable: Throwable): Response = when (throwable) {
+    else -> Response(Status.INTERNAL_SERVER_ERROR)
+}
+
+private fun languageNotImplementedResponse(language: String): Response =
+    Response(Status.NOT_IMPLEMENTED).body("Language [$language] support is not implemented!")

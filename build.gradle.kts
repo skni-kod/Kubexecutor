@@ -1,21 +1,33 @@
-val ktor_version: String by project
 val kotlin_version: String by project
-val logback_version: String by project
+val logback_version = "1.4.6"
 val koin_version = "3.4.0"
+val jackson_version = "2.14.2"
+val http4k_version = "4.41.4.0"
 
 plugins {
     kotlin("jvm") version "1.8.10"
-    id("io.ktor.plugin") version "2.2.4"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
 }
 
 group = "pl.edu.prz.kod"
 version = "0.0.1"
-application {
-    mainClass.set("pl.edu.prz.kod.application.ApplicationKt")
 
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "pl.edu.prz.kod.application.ApplicationKt"
+    }
+    archiveFileName.set("kubexecutor.jar")
+
+    // To avoid the duplicate handling strategy error
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // To add all the dependencies
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }
 
 repositories {
@@ -23,23 +35,16 @@ repositories {
 }
 
 dependencies {
-    implementation("io.insert-koin:koin-ktor:$koin_version")
-    implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
-    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-call-logging-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+    implementation("io.insert-koin:koin-core:$koin_version")
+    implementation("org.http4k:http4k-bom:$http4k_version")
+    implementation("org.http4k:http4k-core:$http4k_version")
+    implementation("org.http4k:http4k-server-netty:$http4k_version")
+    implementation("org.http4k:http4k-format-jackson:$http4k_version")
+    implementation("org.http4k:http4k-format-core:$http4k_version")
+    implementation("org.http4k:http4k-contract:$http4k_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-status-pages-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-request-validation:$ktor_version")
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
+    implementation("ch.qos.logback.contrib:logback-json-classic:0.1.5")
+    implementation("ch.qos.logback.contrib:logback-jackson:0.1.5")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jackson_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-}
-
-ktor {
-    fatJar {
-        archiveFileName.set("kubexecutor.jar")
-    }
 }

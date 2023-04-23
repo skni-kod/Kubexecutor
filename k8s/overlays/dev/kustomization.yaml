@@ -6,7 +6,7 @@ resources:
 
 images:
   - name: musiek/kubexecutor
-    newTag: '0.11'
+    newTag: '0.12'
 
 replicas:
   - name: kubexecutor

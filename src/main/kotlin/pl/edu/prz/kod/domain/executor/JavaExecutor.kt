@@ -1,6 +1,5 @@
 package pl.edu.prz.kod.domain.executor
 
-import pl.edu.prz.kod.domain.CompilationFailedError
 import pl.edu.prz.kod.domain.ExecutionResult
 import pl.edu.prz.kod.domain.Language
 import java.io.File
@@ -32,12 +31,18 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
         javaFile.writeText(code)
 
         val compilationProcess = runSystemCommand("javac -d $buildDirPath ${javaFile.name}", srcDir)
+        if (compilationProcess.timedOut()) {
+            return ExecutionResult.Failure.CompilationTimedOutError(timeout, timeoutUnit)
+        }
         if (compilationProcess.exitValue() != 0) {
-            throw CompilationFailedError(compilationProcess.errorStream.bufferedReader().readText())
+            return ExecutionResult.Failure.CompilationFailedError(compilationProcess.errorStream.bufferedReader().readText())
         }
 
         val runProcess = runSystemCommand("java -classpath $buildDirPath $javaPackageName$javaClassName", runDir)
-        return ExecutionResult(
+        if (runProcess.timedOut()) {
+            return ExecutionResult.Failure.ProcessTimedOutError(timeout, timeoutUnit)
+        }
+        return ExecutionResult.Success(
                 stdout = runProcess.inputStream.bufferedReader().readText(),
                 stdErr = runProcess.errorStream.bufferedReader().readText(),
                 exitCode = runProcess.exitValue()
