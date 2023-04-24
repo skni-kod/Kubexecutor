@@ -11,17 +11,18 @@ fun main() {
     startKoin {
         modules(
             applicationModule,
-            domainModule,
-
+            domainModule
         )
     }
 
+    val httpPort = EnvironmentVariable.getHttpPort(8080)
+
     HttpHandler()
         .tracingHandler
-        .asServer(SingleThreadedNetty(port = 8080))
+        .asServer(SingleThreadedNetty(port = httpPort))
         .start()
 
-    logEvent (
-        ApplicationStartedEvent()
+    logEvent(
+        ApplicationStartedEvent(httpPort)
     )
 }

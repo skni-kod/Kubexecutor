@@ -21,4 +21,4 @@ data class ExecutionSuccessfulEvent(val stdout: String, val stdErr: String, val 
 data class ExecutionFailedEvent(val message: String): Event
 data class LanguageNotImplementedEvent(val language: String): Event
 data class ExceptionEvent(val exception: Throwable): Event
-data class ApplicationStartedEvent(val message: String = "Application started"): Event
+data class ApplicationStartedEvent(val port: Int, val message: String = "Application started"): Event
