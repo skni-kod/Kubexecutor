@@ -32,7 +32,7 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
 
         val compilationProcess = runSystemCommand("javac -d $buildDirPath ${javaFile.name}", srcDir)
         if (compilationProcess.timedOut()) {
-            return ExecutionResult.Failure.CompilationTimedOutError(timeout, timeoutUnit)
+            return ExecutionResult.Failure.CompilationTimedOutError(timeout)
         }
         if (compilationProcess.exitValue() != 0) {
             return ExecutionResult.Failure.CompilationFailedError(compilationProcess.errorStream.bufferedReader().readText())
@@ -40,7 +40,7 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
 
         val runProcess = runSystemCommand("java -classpath $buildDirPath $javaPackageName$javaClassName", runDir)
         if (runProcess.timedOut()) {
-            return ExecutionResult.Failure.ProcessTimedOutError(timeout, timeoutUnit)
+            return ExecutionResult.Failure.ProcessTimedOutError(timeout)
         }
         return ExecutionResult.Success(
                 stdout = runProcess.inputStream.bufferedReader().readText(),

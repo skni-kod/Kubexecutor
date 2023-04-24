@@ -19,7 +19,7 @@ fun main() {
 
     HttpHandler()
         .tracingHandler
-        .asServer(SingleThreadedNetty(port = httpPort))
+        .asServer(CustomNetty(port = httpPort))
         .start()
 
     logEvent(

@@ -19,7 +19,7 @@ import java.net.InetSocketAddress
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class SingleThreadedNetty(val port: Int = 8000, override val stopMode: ServerConfig.StopMode) : ServerConfig {
+class CustomNetty(val port: Int = 8000, override val stopMode: ServerConfig.StopMode) : ServerConfig {
     constructor(port: Int = 8000) : this(port, ServerConfig.StopMode.Graceful(Duration.ofSeconds(15)))
 
     val shutdownTimeoutMillis = when (stopMode) {
@@ -28,7 +28,7 @@ class SingleThreadedNetty(val port: Int = 8000, override val stopMode: ServerCon
     }
 
     override fun toServer(http: HttpHandler): Http4kServer = object : Http4kServer {
-        private val commonGroup = NioEventLoopGroup(1)
+        private val commonGroup = NioEventLoopGroup()
         private var closeFuture: ChannelFuture? = null
         private lateinit var address: InetSocketAddress
 
