@@ -9,7 +9,7 @@ class PythonExecutor: AbstractExecutor(Language.PYTHON) {
         val escapedCode = code.replace("\"", "\\\"")
         val process = runSystemCommand("echo \"$escapedCode\" | python3")
         if (process.timedOut()) {
-            return ExecutionResult.Failure.ProcessTimedOutError(timeout, timeoutUnit)
+            return ExecutionResult.Failure.ProcessTimedOutError(timeout)
         }
         return ExecutionResult.Success(
             stdout = process.inputStream.bufferedReader().readText(),
