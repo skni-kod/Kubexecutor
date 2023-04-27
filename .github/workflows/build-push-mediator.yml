@@ -7,6 +7,8 @@ on:
         description: 'Image tag'
         required: true
   push:
+    branches:
+      - 'feature/**'
 
 jobs:
   build-and-push:
