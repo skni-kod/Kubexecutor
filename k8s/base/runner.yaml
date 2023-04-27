@@ -40,6 +40,6 @@ spec:
       containers:
         - name: kubexecutor
           image: musiek/runner:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
