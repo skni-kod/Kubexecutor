@@ -10,9 +10,6 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./runner
     steps:
     - uses: actions/checkout@v2
 
@@ -23,9 +20,10 @@ jobs:
         java-version: '17'
 
     - name: Build with Gradle
-      run: ./gradlew jar
+      run: ./gradlew :runner:jar
 
     - name: Build Docker image
+      working-directory: ./runner
       run: docker build -t musiek/runner:${{ github.event.inputs.imageTag }} -t musiek/runner:latest .
 
     - name: Log in to Docker Hub

@@ -10,9 +10,6 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./mediator
     steps:
     - uses: actions/checkout@v2
 
@@ -23,9 +20,10 @@ jobs:
         java-version: '17'
 
     - name: Build with Gradle
-      run: ./gradlew jar
+      run: ./gradlew :mediator:jar
 
     - name: Build Docker image
+      working-directory: ./mediator
       run: docker build -t musiek/mediator:${{ github.event.inputs.imageTag }} -t musiek/mediator:latest .
 
     - name: Log in to Docker Hub
