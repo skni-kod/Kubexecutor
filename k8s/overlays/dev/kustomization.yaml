@@ -11,5 +11,5 @@ images:
     newTag: '0.1'
 
 replicas:
-  - name: kubexecutor
+  - name: runner
     count: 10
