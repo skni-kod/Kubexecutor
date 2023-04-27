@@ -1,0 +1,45 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: app
+  labels:
+    name: kubexecutor
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: runner-svc
+  namespace: app
+  labels:
+    app: runner
+spec:
+  ports:
+    - port: 8080
+      name: runner
+  clusterIP: None
+  selector:
+    app: runner
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: runner
+  namespace: app
+spec:
+  selector:
+    matchLabels:
+      app: runner
+  serviceName: runner-svc
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: runner
+    spec:
+      runtimeClassName: kata-dragonball
+      containers:
+        - name: kubexecutor
+          image: musiek/kubexecutor:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080

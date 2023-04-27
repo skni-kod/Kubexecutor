@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mediator
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mediator
+  template:
+    metadata:
+      labels:
+        app: mediator
+    spec:
+      runtimeClassName: kata-dragonball
+      containers:
+        - name: mediator
+          image: musiek/mediator:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: RUNNER_INSTANCES
+              value: "10"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mediator
+  namespace: app
+  labels:
+    app: mediator
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8081
+  selector:
+    app: mediator

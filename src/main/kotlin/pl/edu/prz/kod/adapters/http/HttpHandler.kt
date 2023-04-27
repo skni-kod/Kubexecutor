@@ -6,6 +6,8 @@ import org.http4k.core.Status.Companion.OK
 import org.http4k.format.Jackson
 import org.http4k.contract.openapi.ApiInfo
 import org.http4k.contract.openapi.v2.OpenApi2
+import org.http4k.core.HttpHandler
+import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.RoutingHttpHandler
@@ -53,7 +55,7 @@ class HttpHandler {
             )
         }.then(exceptionCatchingHandler)
 
-    val tracingHandler = ServerFilters.RequestTracing()
+    val tracingHandler: HttpHandler = ServerFilters.RequestTracing()
         .then(eventsHandler)
 
     private fun executeRoute(): ContractRoute {
@@ -96,12 +98,13 @@ class HttpHandler {
                         )
                         executeDecoded(code)
                     }
+
                     is DecodingResult.Failure -> handleDecodingError(decodingResult)
                 }
                 executorStatus = ExecutorStatus.RESTARTING
                 result
             } else {
-                Response(Status.SERVICE_UNAVAILABLE).body("Executor not in ready status")
+                Response(SERVICE_UNAVAILABLE).body("Executor not in ready status")
             }
         }
 
@@ -120,7 +123,10 @@ class HttpHandler {
         } bindContract Method.GET
 
         fun getStatus() = { _: Request ->
-            statusResponseLens.inject(StatusResponse(executorStatus), Response(OK))
+            statusResponseLens.inject(
+                StatusResponse(executorStatus),
+                if (executorStatus == ExecutorStatus.READY) Response(OK) else Response(SERVICE_UNAVAILABLE)
+            )
         }
 
         return spec to ::getStatus
