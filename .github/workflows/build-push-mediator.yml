@@ -6,6 +6,7 @@ on:
       imageTag:
         description: 'Image tag'
         required: true
+  push:
 
 jobs:
   build-and-push:
