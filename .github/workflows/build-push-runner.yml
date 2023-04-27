@@ -2,10 +2,9 @@ name: Build & Push Runner
 
 on:
   workflow_dispatch:
-    inputs:
-      imageTag:
-        description: 'Image tag'
-        required: true
+  push:
+    branches:
+      - 'feature/**'
 
 jobs:
   build-and-push:
@@ -19,12 +18,20 @@ jobs:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '17'
 
+    - name: Install yq
+      run: |
+        wget -qO ./yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        chmod u+x ./yq
+
+    - name: Get runner version
+      run: echo "IMAGE_TAG=$(./yq '.images[0].newTag' k8s/overlays/dev/kustomization.yaml)" >> $GITHUB_ENV
+
     - name: Build with Gradle
       run: ./gradlew :runner:jar
 
     - name: Build Docker image
       working-directory: ./runner
-      run: docker build -t musiek/runner:${{ github.event.inputs.imageTag }} -t musiek/runner:latest .
+      run: docker build -t musiek/runner:${{ env.IMAGE_TAG }} -t musiek/runner:latest .
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v1
@@ -34,5 +41,5 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker push musiek/runner:${{ github.event.inputs.imageTag }}
+        docker push musiek/runner:${{ env.IMAGE_TAG }}
         docker push musiek/runner:latest
