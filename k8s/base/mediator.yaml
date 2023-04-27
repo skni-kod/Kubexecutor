@@ -34,6 +34,8 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 8081
+    - protocol: TCP
+      port: 4747
+      targetPort: 8081
   selector:
     app: mediator
