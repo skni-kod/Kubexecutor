@@ -3,6 +3,7 @@ package pl.edu.prz.kod.runner.application
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
 import pl.edu.prz.kod.runner.adapters.http.ApplicationStartedEvent
+import pl.edu.prz.kod.runner.adapters.http.CustomUndertow
 import pl.edu.prz.kod.runner.adapters.http.HttpHandler
 import pl.edu.prz.kod.runner.adapters.http.logEvent
 import pl.edu.prz.kod.runner.domain.domainModule
@@ -19,7 +20,7 @@ fun main() {
 
     HttpHandler()
         .tracingHandler
-        .asServer(pl.edu.prz.kod.runner.adapters.http.CustomUndertow(port = httpPort))
+        .asServer(CustomUndertow(port = httpPort))
         .start()
 
     logEvent(

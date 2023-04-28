@@ -14,10 +14,11 @@ enum class RunnerState {
 val state: ConcurrentHashMap<String, RunnerState> = ConcurrentHashMap()
 val client: HttpHandler = OkHttp()
 
+val httpPort: Int = System.getenv("HTTP_PORT")?.toInt() ?: 8081
 val runnerName: String = System.getenv("RUNNER_POD_NAME") ?: "runner"
 val runnerInstances: Int = System.getenv("RUNNER_INSTANCES")?.toInt() ?: 2
 val pathFormat: String = System.getenv("PATH_FORMAT") ?: "http://%s.runner-svc.app.svc.cluster.local:8080"
-val statusQueryPeriod: Int = System.getenv("STATUS_QUERY_PERIOD")?.toInt() ?: 2000
+val statusQueryPeriod: Long = System.getenv("STATUS_QUERY_PERIOD")?.toLong() ?: 2000
 fun main() {
 
     (0 until runnerInstances).forEach {
@@ -32,7 +33,7 @@ fun main() {
                 .filter { it.second.status == Status.OK }
                 .forEach { state[it.first] = RunnerState.READY }
         }
-    }, 0, 1000)
+    }, 0, statusQueryPeriod)
 
     val app: HttpHandler = { request: Request ->
         val freeRunner = state
@@ -49,5 +50,5 @@ fun main() {
         }
     }
 
-    app.asServer(Netty(port = 8081)).start()
+    app.asServer(Netty(port = httpPort)).start()
 }

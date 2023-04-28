@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:17-jres-jammy
 
 RUN groupadd \
     --gid 1001 \

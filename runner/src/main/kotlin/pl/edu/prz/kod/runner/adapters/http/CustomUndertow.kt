@@ -1,7 +1,6 @@
 package pl.edu.prz.kod.runner.adapters.http
 
 import io.undertow.Undertow
-import io.undertow.UndertowOptions.ENABLE_HTTP2
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
 import io.undertow.server.handlers.GracefulShutdownHandler
@@ -14,11 +13,8 @@ import java.net.InetSocketAddress
 
 class CustomUndertow(
     val port: Int = 8000,
-    val enableHttp2: Boolean,
     override val stopMode: StopMode = StopMode.Immediate
 ) : ServerConfig {
-    constructor(port: Int = 8000) : this(port, false)
-
     override fun toServer(http: HttpHandler): Http4kServer {
         val httpHandler =
             (http).let(::Http4kUndertowHttpHandler).let(::BlockingHandler).let { handler ->
@@ -33,7 +29,6 @@ class CustomUndertow(
             val server = Undertow.builder()
                 .addHttpListener(port, "0.0.0.0")
                 .setWorkerThreads(1)
-                .setServerOption(ENABLE_HTTP2, enableHttp2)
                 .setHandler(httpHandler).build()
 
             override fun start() = apply { server.start() }

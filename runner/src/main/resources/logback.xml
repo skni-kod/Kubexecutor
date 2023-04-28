@@ -14,7 +14,7 @@
     <root level="debug">
         <appender-ref ref="stdout"/>
     </root>
-    <logger name="org.jboss.logging" level="off"/>
+    <logger name="org.jboss" level="off"/>
     <logger name="org.xnio" level="off"/>
     <logger name="io.undertow" level="off"/>
 </configuration>
