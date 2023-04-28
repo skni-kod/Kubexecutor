@@ -5,9 +5,11 @@ resources:
 - ../../base
 
 images:
-  - name: musiek/kubexecutor
-    newTag: '0.13'
+  - name: musiek/runner
+    newTag: '0.14'
+  - name: musiek/mediator
+    newTag: '0.1'
 
 replicas:
-  - name: kubexecutor
-    count: 2
+  - name: runner
+    count: 10
