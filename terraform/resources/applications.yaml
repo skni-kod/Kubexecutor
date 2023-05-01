@@ -1,0 +1,17 @@
+applications:
+  - name: kubexecutor
+    namespace: argocd
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+    project: default
+    sources:
+    - repoURL: https://github.com/skni-kod/Kubexecutor.git
+      path: k8s/overlays/dev
+      targetRevision: HEAD
+    destination:
+     server: https://kubernetes.default.svc
+     namespace: app
+    syncPolicy:
+      automated:
+       prune: true
+       selfHeal: true
