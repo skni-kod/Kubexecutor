@@ -1,11 +1,12 @@
-package pl.edu.prz.kod.domain.executor
+package pl.edu.prz.kod.runner.domain.executor
 
-import pl.edu.prz.kod.domain.ExecutionResult
-import pl.edu.prz.kod.domain.Language
+import pl.edu.prz.kod.runner.domain.ExecutionResult
+import pl.edu.prz.kod.runner.domain.Language
 
-class NodeExecutor: AbstractExecutor(Language.NODE) {
+class NodeJSExecutor: AbstractExecutor(Language.NODEJS) {
+
     override fun execute(code: String): ExecutionResult {
-        val escapedCode = code.replace("\"", "\\\"")
+        val escapedCode = code.replace("\\", "\\\\").replace("\"", "\\\"")
         val process = runSystemCommand("echo \"$escapedCode\" | node")
         if (process.timedOut()) {
             return ExecutionResult.Failure.ProcessTimedOutError(timeout)
