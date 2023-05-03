@@ -1,7 +1,7 @@
 # Kubexecutor
 To build:
 ```shell
-./gradlew buildFatJar
+./gradlew jar
 ```
 
 To build container image:
@@ -28,7 +28,10 @@ We'll be using kata-containers stable-3.1.
 Source:
 * https://docs.k3s.io/quick-start
 * https://github.com/kata-containers/kata-containers/blob/stable-3.1/tools/packaging/kata-deploy/README.md
-  
+
+## Setting up ArgoCD and Grafana/Loki/Promtail stack for monitoring
+1. Run `terraform apply` on a machine which keeps the state of the cluster.
+
 ## Accessing ArgoCD
 
 ```shell
