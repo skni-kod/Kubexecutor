@@ -1,3 +1,10 @@
+resource "kubernetes_namespace" "app_namespace" {
+  metadata {
+    name = "app"
+  }
+}
+
+
 resource "helm_release" "argocd" {
   name  = "argocd"
 
@@ -6,11 +13,6 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   version          = "5.29.1"
   create_namespace = true
-
-  set {
-    name  = "configs.params.server.disable.auth"
-    value = "true"
-  }
 
 }
 
