@@ -6,7 +6,7 @@ import pl.edu.prz.kod.runner.domain.Language
 class PythonExecutor: AbstractExecutor(Language.PYTHON) {
 
     override fun execute(code: String): ExecutionResult {
-        val escapedCode = code.replace("\\", "\\\\").replace("\"", "\\\"")
+        val escapedCode = getEscapedCode(code)
         val process = runSystemCommand("echo \"$escapedCode\" | python3")
         if (process.timedOut()) {
             return ExecutionResult.Failure.ProcessTimedOutError(timeout)
@@ -17,5 +17,4 @@ class PythonExecutor: AbstractExecutor(Language.PYTHON) {
             exitCode = process.exitValue()
         )
     }
-
 }

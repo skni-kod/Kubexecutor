@@ -6,7 +6,7 @@ import pl.edu.prz.kod.runner.domain.Language
 class NodeJSExecutor: AbstractExecutor(Language.NODEJS) {
 
     override fun execute(code: String): ExecutionResult {
-        val escapedCode = code.replace("\\", "\\\\").replace("\"", "\\\"")
+        val escapedCode = getEscapedCode(code)
         val process = runSystemCommand("echo \"$escapedCode\" | node")
         if (process.timedOut()) {
             return ExecutionResult.Failure.ProcessTimedOutError(timeout)
