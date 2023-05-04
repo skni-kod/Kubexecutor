@@ -3,11 +3,11 @@ package pl.edu.prz.kod.runner.domain.executor
 import pl.edu.prz.kod.runner.domain.ExecutionResult
 import pl.edu.prz.kod.runner.domain.Language
 
-class PythonExecutor: AbstractExecutor(Language.PYTHON) {
+class NodeJSExecutor: AbstractExecutor(Language.NODEJS) {
 
     override fun execute(code: String): ExecutionResult {
         val escapedCode = getEscapedCode(code)
-        val process = runSystemCommand("echo \"$escapedCode\" | python3")
+        val process = runSystemCommand("echo \"$escapedCode\" | node")
         if (process.timedOut()) {
             return ExecutionResult.Failure.ProcessTimedOutError(timeout)
         }

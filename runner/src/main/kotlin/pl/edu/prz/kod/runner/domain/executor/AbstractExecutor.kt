@@ -23,4 +23,8 @@ sealed class AbstractExecutor(language: Language) {
     protected fun Process.timedOut(): Boolean =
         !this.waitFor(timeout, TimeUnit.MILLISECONDS)
 
+    protected fun getEscapedCode(code: String): String {
+        return code.replace("\\", "\\\\").replace("\"", "\\\"")
+    }
+
 }
