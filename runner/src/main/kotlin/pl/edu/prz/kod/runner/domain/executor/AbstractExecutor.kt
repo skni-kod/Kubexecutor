@@ -11,20 +11,17 @@ sealed class AbstractExecutor(language: Language) {
 
     abstract fun execute(code: String): ExecutionResult
 
-    protected fun runSystemCommand(command: String, workDir: File = File("/app")): Process {
-        val systemCommand = listOf("bash", "-c", command)
-        return ProcessBuilder(systemCommand)
+    protected fun runSystemCommand(command: String, workDir: File = File("/app")): Process =
+        ProcessBuilder(listOf("sh", "-c", command))
             .directory(workDir)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
-    }
 
     protected fun Process.timedOut(): Boolean =
         !this.waitFor(timeout, TimeUnit.MILLISECONDS)
 
-    protected fun getEscapedCode(code: String): String {
-        return code.replace("\\", "\\\\").replace("\"", "\\\"")
-    }
-
+    protected fun getEscapedCode(code: String): String =
+        code.replace("\\", "\\\\")
+            .replace("\"", "\\\"")
 }

@@ -1,18 +1,17 @@
-FROM eclipse-temurin:17-jdk-jammy
+FROM alpine:3.17.3
 
-RUN apt-get update && apt-get -y install python3
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&\
-    apt-get install -y nodejs
+RUN apk update \
+    && apk upgrade \
+    && apk add --update openjdk17-jdk python3 nodejs
 
-RUN groupadd \
+RUN addgroup \
     --gid 1001 \
     --system \
     executor \
-    && useradd \
-    --create-home \
-    --gid executor \
+    && adduser \
+    --disabled-password \
     --home /app \
-    --no-log-init \
+    --ingroup executor \
     --system \
     --uid 1001 \
     executor
