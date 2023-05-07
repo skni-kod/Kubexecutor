@@ -1,14 +1,17 @@
-FROM eclipse-temurin:17-jre-jammy
+FROM alpine:3.17.3
 
-RUN groupadd \
+RUN apk update \
+    && apk upgrade \
+    && apk add --update openjdk17-jre-headless
+
+RUN addgroup \
     --gid 1001 \
     --system \
     executor \
-    && useradd \
-    --create-home \
-    --gid executor \
+    && adduser \
+    --disabled-password \
     --home /app \
-    --no-log-init \
+    --ingroup executor \
     --system \
     --uid 1001 \
     executor
