@@ -11,8 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+
+    - name: Install yq
+      run: |
+        wget -qO ./yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        chmod u+x ./yq
     
-    - name: Get runner version
+    - name: Get frontend version
       run: echo "IMAGE_TAG=$(./yq '.images[2].newTag' k8s/overlays/dev/kustomization.yaml)" >> $GITHUB_ENV
     
     - name: Build Docker image
