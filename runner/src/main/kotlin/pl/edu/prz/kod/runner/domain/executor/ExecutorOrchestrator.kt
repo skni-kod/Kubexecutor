@@ -1,9 +1,9 @@
 package pl.edu.prz.kod.runner.domain.executor
 
 import org.koin.java.KoinJavaComponent.inject
+import pl.edu.prz.kod.common.domain.Language
 import pl.edu.prz.kod.runner.domain.Code
 import pl.edu.prz.kod.runner.domain.ExecutionResult
-import pl.edu.prz.kod.runner.domain.Language
 import pl.edu.prz.kod.runner.ports.ExecutorOrchestratorPort
 
 class ExecutorOrchestrator : ExecutorOrchestratorPort() {

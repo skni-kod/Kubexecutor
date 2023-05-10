@@ -6,9 +6,9 @@ resources:
 
 images:
   - name: musiek/runner
-    newTag: '0.17'
+    newTag: '0.18'
   - name: musiek/mediator
-    newTag: '0.21'
+    newTag: '0.22'
   - name: musiek/frontend
     newTag: '0.01'
 

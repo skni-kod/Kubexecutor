@@ -1,7 +1,7 @@
 package pl.edu.prz.kod.runner.domain.executor
 
+import pl.edu.prz.kod.common.domain.Language
 import pl.edu.prz.kod.runner.domain.ExecutionResult
-import pl.edu.prz.kod.runner.domain.Language
 
 class NodeJSExecutor: AbstractExecutor(Language.NODEJS) {
 

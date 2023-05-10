@@ -1,4 +1,4 @@
-package pl.edu.prz.kod.runner.domain
+package pl.edu.prz.kod.common.domain
 
 enum class Language(val value: String) {
     PYTHON("python"),

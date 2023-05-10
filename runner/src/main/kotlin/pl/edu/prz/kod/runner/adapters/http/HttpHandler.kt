@@ -6,43 +6,42 @@ import org.http4k.core.Status.Companion.OK
 import org.http4k.format.Jackson
 import org.http4k.contract.openapi.ApiInfo
 import org.http4k.contract.openapi.v2.OpenApi2
-import org.http4k.core.HttpHandler
 import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.routes
 import org.koin.java.KoinJavaComponent.inject
+import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
+import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.runner.adapters.http.dto.*
 import pl.edu.prz.kod.runner.domain.Code
 import pl.edu.prz.kod.runner.domain.ExecutionResult
-import pl.edu.prz.kod.runner.domain.ExecutorStatus
 import pl.edu.prz.kod.runner.ports.ExecutorOrchestratorPort
+import pl.edu.prz.kod.common.adapters.http.dto.StatusResponse
+import pl.edu.prz.kod.common.domain.RunnerStatus
 import java.util.*
 
 class HttpHandler {
     private val base64Decoder by inject<Base64.Decoder>(Base64.Decoder::class.java)
     private val executorOrchestrator by inject<ExecutorOrchestratorPort>(ExecutorOrchestratorPort::class.java)
 
-    private var executorStatus = ExecutorStatus.READY
+    private var runnerStatus = RunnerStatus.READY
 
     private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
     private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
     private val statusResponseLens = Jackson.autoBody<StatusResponse>().toLens()
 
     private val routesContract = contract {
-        renderer = OpenApi2(ApiInfo("Kubexecutor API", "v1.0"), Jackson)
+        renderer = OpenApi2(ApiInfo("Kubexecutor Runner API", "v1.0"), Jackson)
         descriptionPath = "/openapi.json"
         routes += executeRoute()
         routes += statusRoute()
     }
 
-    private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters.CatchAll { exception ->
-        logEvent(
-            ExceptionEvent(exception)
-        )
-        handleException(exception)
-    }.then(routes(routesContract))
+    private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
+        .CatchAll { ErrorHandler.handleException(it) }
+        .then(routes(routesContract))
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
@@ -55,7 +54,7 @@ class HttpHandler {
             )
         }.then(exceptionCatchingHandler)
 
-    val tracingHandler: HttpHandler = ServerFilters.RequestTracing()
+    val tracingHandler: RoutingHttpHandler = ServerFilters.RequestTracing()
         .then(eventsHandler)
 
     private fun executeRoute(): ContractRoute {
@@ -78,8 +77,8 @@ class HttpHandler {
         } bindContract Method.POST
 
         fun execute() = { request: Request ->
-            if (executorStatus == ExecutorStatus.READY) {
-                executorStatus = ExecutorStatus.EXECUTING
+            if (runnerStatus == RunnerStatus.READY) {
+                runnerStatus = RunnerStatus.EXECUTING
                 val codeRequest = executeRequestLens.extract(request)
                 logEvent(
                     ReceivedCodeRequestEvent(
@@ -99,9 +98,9 @@ class HttpHandler {
                         executeDecoded(code)
                     }
 
-                    is DecodingResult.Failure -> handleDecodingError(decodingResult)
+                    is DecodingResult.Failure -> ErrorHandler.handleDecodingError(decodingResult)
                 }
-                executorStatus = ExecutorStatus.RESTARTING
+                runnerStatus = RunnerStatus.RESTARTING
                 result
             } else {
                 Response(SERVICE_UNAVAILABLE).body("Executor not in ready status")
@@ -117,15 +116,15 @@ class HttpHandler {
             returning(
                 OK,
                 statusResponseLens to StatusResponse(
-                    ExecutorStatus.READY
+                    RunnerStatus.READY
                 )
             )
         } bindContract Method.GET
 
         fun getStatus() = { _: Request ->
             statusResponseLens.inject(
-                StatusResponse(executorStatus),
-                if (executorStatus == ExecutorStatus.READY) Response(OK) else Response(SERVICE_UNAVAILABLE)
+                StatusResponse(runnerStatus),
+                if (runnerStatus == RunnerStatus.READY) Response(OK) else Response(SERVICE_UNAVAILABLE)
             )
         }
 
@@ -145,7 +144,7 @@ class HttpHandler {
                 executeResponseLens.inject(result.encode(), Response(OK))
             }
 
-            is ExecutionResult.Failure -> handleExecutionError(result)
+            is ExecutionResult.Failure -> ErrorHandler.handleExecutionError(result)
         }
     }
 
