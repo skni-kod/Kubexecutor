@@ -1,41 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mediator
+  name: frontend
   namespace: app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mediator
+      app: frontend
   template:
     metadata:
       labels:
-        app: mediator
+        app: frontend
     spec:
       runtimeClassName: kata-dragonball
       containers:
-        - name: mediator
-          image: musiek/mediator:latest
+        - name: frontend
+          image: musiek/frontend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8081
+            - containerPort: 3000
           env:
-            - name: RUNNER_INSTANCES
-              value: "10"
+            - name: EXECUTE_ENDPOINT
+              value: http://mediator.app.svc.cluster.local:8081/execute
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mediator
+  name: frontend
   namespace: app
   labels:
-    app: mediator
+    app: frontend
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - protocol: TCP
-      port: 8081
-      targetPort: 8081
+      port: 4747
+      targetPort: 3000
   selector:
-    app: mediator
+    app: frontend
