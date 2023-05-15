@@ -18,6 +18,7 @@ import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
 class HttpHandler {
+    private val errorHandler by inject<ErrorHandler>(ErrorHandler::class.java)
     private val runnerManager by inject<RunnerManagerPort>(RunnerManagerPort::class.java)
 
     private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
@@ -30,7 +31,7 @@ class HttpHandler {
     }
 
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
-        .CatchAll { ErrorHandler.handleException(it) }
+        .CatchAll { errorHandler.handleException(it) }
         .then(routes(routesContract))
 
     private val eventsHandler =
@@ -72,7 +73,7 @@ class HttpHandler {
                 is ExecuteRequestResult.Success ->
                     executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))
                 is ExecuteRequestResult.Failure ->
-                    ErrorHandler.handleExecuteRequestError(executeRequestResult)
+                    errorHandler.handleExecuteRequestError(executeRequestResult)
             }
         }
 

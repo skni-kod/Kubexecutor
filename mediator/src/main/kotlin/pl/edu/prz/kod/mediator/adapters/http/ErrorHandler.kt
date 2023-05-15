@@ -7,35 +7,31 @@ import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 
 class ErrorHandler {
-    companion object {
-        private val errorResponseLens = Jackson.autoBody<ErrorResponse>().toLens()
+    private val errorResponseLens = Jackson.autoBody<ErrorResponse>().toLens()
 
-        @JvmStatic
-        fun handleExecuteRequestError(requestResult: ExecuteRequestResult.Failure): Response {
-            logEvent(ExecutionFailedEvent(requestResult.message))
-            return when (requestResult) {
-                is ExecuteRequestResult.Failure.NoReplyFromRunner ->
-                    errorResponseLens.inject(ErrorResponse(requestResult.message), Response(Status.INTERNAL_SERVER_ERROR))
+    fun handleExecuteRequestError(requestResult: ExecuteRequestResult.Failure): Response {
+        logEvent(ExecutionFailedEvent(requestResult.message))
+        return when (requestResult) {
+            is ExecuteRequestResult.Failure.NoReplyFromRunner ->
+                errorResponseLens.inject(ErrorResponse(requestResult.message), Response(Status.INTERNAL_SERVER_ERROR))
 
-                is ExecuteRequestResult.Failure.NoRunnerAvailable ->
-                    errorResponseLens.inject(ErrorResponse(requestResult.message), Response(Status.SERVICE_UNAVAILABLE))
+            is ExecuteRequestResult.Failure.NoRunnerAvailable ->
+                errorResponseLens.inject(ErrorResponse(requestResult.message), Response(Status.SERVICE_UNAVAILABLE))
 
-                is ExecuteRequestResult.Failure.ErrorReplyFromRunner ->
-                    errorResponseLens.inject(
-                        requestResult.errorResponse,
-                        Response(Status(requestResult.statusCode, requestResult.statusDescription))
-                    )
-            }
+            is ExecuteRequestResult.Failure.ErrorReplyFromRunner ->
+                errorResponseLens.inject(
+                    requestResult.errorResponse,
+                    Response(Status(requestResult.statusCode, requestResult.statusDescription))
+                )
         }
+    }
 
-        //    Handle future exceptions here
-        @JvmStatic
-        fun handleException(throwable: Throwable): Response {
-            logEvent(ExceptionEvent(throwable))
-            return errorResponseLens.inject(
-                ErrorResponse("Internal error occurred"),
-                Response(Status.INTERNAL_SERVER_ERROR)
-            )
-        }
+    //    Handle future exceptions here
+    fun handleException(throwable: Throwable): Response {
+        logEvent(ExceptionEvent(throwable))
+        return errorResponseLens.inject(
+            ErrorResponse("Internal error occurred"),
+            Response(Status.INTERNAL_SERVER_ERROR)
+        )
     }
 }

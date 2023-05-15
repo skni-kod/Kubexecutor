@@ -24,6 +24,7 @@ import java.util.*
 
 class HttpHandler {
     private val base64Decoder by inject<Base64.Decoder>(Base64.Decoder::class.java)
+    private val errorHandler by inject<ErrorHandler>(ErrorHandler::class.java)
     private val executorOrchestrator by inject<ExecutorOrchestratorPort>(ExecutorOrchestratorPort::class.java)
 
     private var runnerStatus = RunnerStatus.READY
@@ -40,7 +41,7 @@ class HttpHandler {
     }
 
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
-        .CatchAll { ErrorHandler.handleException(it) }
+        .CatchAll { errorHandler.handleException(it) }
         .then(routes(routesContract))
 
     private val eventsHandler =
@@ -98,7 +99,7 @@ class HttpHandler {
                         executeDecoded(code)
                     }
 
-                    is DecodingResult.Failure -> ErrorHandler.handleDecodingError(decodingResult)
+                    is DecodingResult.Failure -> errorHandler.handleDecodingError(decodingResult)
                 }
                 runnerStatus = RunnerStatus.RESTARTING
                 result
@@ -144,7 +145,7 @@ class HttpHandler {
                 executeResponseLens.inject(result.encode(), Response(OK))
             }
 
-            is ExecutionResult.Failure -> ErrorHandler.handleExecutionError(result)
+            is ExecutionResult.Failure -> errorHandler.handleExecutionError(result)
         }
     }
 

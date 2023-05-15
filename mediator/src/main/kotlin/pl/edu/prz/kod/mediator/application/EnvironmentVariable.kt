@@ -1,4 +1,6 @@
-package pl.edu.prz.kod.common.application
+package pl.edu.prz.kod.mediator.application
+
+import pl.edu.prz.kod.common.application.BaseEnvironmentVariable
 
 class EnvironmentVariable {
     companion object {

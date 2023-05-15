@@ -9,7 +9,7 @@ import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
 import pl.edu.prz.kod.common.adapters.http.dto.StatusResponse
-import pl.edu.prz.kod.common.application.EnvironmentVariable
+import pl.edu.prz.kod.mediator.application.EnvironmentVariable
 import pl.edu.prz.kod.common.domain.RunnerStatus
 import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
 import pl.edu.prz.kod.mediator.adapters.http.RunnerReadyEvent
