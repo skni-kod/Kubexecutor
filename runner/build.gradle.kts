@@ -34,6 +34,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":common"))
     implementation("io.insert-koin:koin-core:$koin_version")
     implementation("org.http4k:http4k-bom:$http4k_version")
     implementation("org.http4k:http4k-core:$http4k_version")

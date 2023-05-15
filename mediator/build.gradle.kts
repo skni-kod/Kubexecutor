@@ -12,7 +12,7 @@ version = "0.0.1"
 
 tasks.withType<Jar> {
     manifest {
-        attributes["Main-Class"] = "pl.edu.prz.kod.mediator.ApplicationKt"
+        attributes["Main-Class"] = "pl.edu.prz.kod.mediator.application.ApplicationKt"
     }
     archiveFileName.set("mediator.jar")
 
@@ -33,11 +33,14 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":common"))
+    implementation("io.insert-koin:koin-core:$koin_version")
     implementation("org.http4k:http4k-bom:$http4k_version")
     implementation("org.http4k:http4k-core:$http4k_version")
     implementation("org.http4k:http4k-server-netty:$http4k_version")
     implementation("org.http4k:http4k-format-jackson:$http4k_version")
     implementation("org.http4k:http4k-format-core:$http4k_version")
+    implementation("org.http4k:http4k-contract:$http4k_version")
     implementation("org.http4k:http4k-client-okhttp:$http4k_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("ch.qos.logback.contrib:logback-json-classic:0.1.5")
