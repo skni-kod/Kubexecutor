@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - runner.yaml
   - mediator.yaml
+  - frontend.yaml
