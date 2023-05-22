@@ -32,7 +32,7 @@ class HttpHandler {
     }
 
     private val requestSourceHandler = RequestSourceFilter()
-        .then(routesContract)
+        .then(routes(routesContract))
 
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }

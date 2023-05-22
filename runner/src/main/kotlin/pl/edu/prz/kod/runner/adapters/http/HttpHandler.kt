@@ -42,14 +42,14 @@ class HttpHandler {
     }
 
     private val statusHandler = RunnerStatusFilter { runnerStatus }
-        .then(routesContract)
+        .then(routes(routesContract))
 
     private val requestSourceHandler = RequestSourceFilter()
         .then(statusHandler)
 
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }
-        .then(routes(requestSourceHandler))
+        .then(requestSourceHandler)
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
