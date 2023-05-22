@@ -28,8 +28,8 @@ services:
       - SYSTEM_COMMAND_TIMEOUT=20000
   kubexecutor-runner-1:
     image: kubexecutor-runner:latest
-    #    ports:
-    #      - "8080:8080"
+#    ports:
+#      - "8080:8080"
     restart: unless-stopped
     networks:
       - kubexecutor-network
