@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 class RunnerManager : RunnerManagerPort() {
     private val client by inject<OkHttpClient>(OkHttpClient::class.java)
 
-    private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
+    private val runnersInfo: ConcurrentHashMap<String, RunnerInfo> = ConcurrentHashMap()
 
     private val runnerInstances = EnvironmentVariable.getRunnerInstances()
     private val runnerName = EnvironmentVariable.getRunnerPodName()
@@ -31,7 +31,7 @@ class RunnerManager : RunnerManagerPort() {
 
     override fun initialize() {
         (0 until runnerInstances).forEach {
-            runnersState["$runnerName-${it}"] = RunnerStatus.RESTARTING
+            runnersInfo["$runnerName-${it}"] = RunnerInfo(RunnerStatus.RESTARTING, null)
         }
 
         Timer().scheduleAtFixedRate(object : TimerTask() {
@@ -41,18 +41,21 @@ class RunnerManager : RunnerManagerPort() {
         }, 0, statusQueryPeriod)
     }
 
+    override fun getRunnersIpAddresses(): List<String> =
+        runnersInfo.map { it.value.ipAddress }.filterNotNull()
+
     override fun execute(codeRequest: CodeRequest): ExecuteRequestResult {
-        val freeRunner = runnersState
-            .filterValues { it == RunnerStatus.READY }
+        val freeRunner = runnersInfo
+            .filterValues { it.status == RunnerStatus.READY }
             .firstNotNullOfOrNull { it.key }
 
         return if (freeRunner == null) {
             ExecuteRequestResult.Failure.NoRunnerAvailable()
         } else {
             logEvent(RequestAssignedToRunnerEvent(freeRunner))
-            runnersState[freeRunner] = RunnerStatus.EXECUTING
+            runnersInfo[freeRunner]?.status = RunnerStatus.EXECUTING
             val requestResult = sendExecuteRequestToRunner(freeRunner, codeRequest)
-            runnersState[freeRunner] = RunnerStatus.RESTARTING
+            runnersInfo[freeRunner]?.status = RunnerStatus.RESTARTING
             requestResult
         }
     }
@@ -87,16 +90,17 @@ class RunnerManager : RunnerManagerPort() {
 
 
     private fun updateRunnersState() {
-        runnersState
-            .filterValues { it == RunnerStatus.RESTARTING }
-            .filter { isRunnerReady(it.key) }
+        runnersInfo
+            .filterValues { it.status == RunnerStatus.RESTARTING }
+            .mapValues { getRunnerStatus(it.key) }
+            .filterValues { it?.status == RunnerStatus.READY }
             .forEach {
-                runnersState[it.key] = RunnerStatus.READY
+                runnersInfo[it.key] = RunnerInfo(RunnerStatus.READY, it.value?.ipAddress)
                 logEvent(RunnerReadyEvent(it.key))
             }
     }
 
-    private fun isRunnerReady(runner: String): Boolean {
+    private fun getRunnerStatus(runner: String): StatusResponse? {
         val request = Request.Builder()
             .url(String.format(pathFormat, runner) + "/status")
             .build()
@@ -104,11 +108,10 @@ class RunnerManager : RunnerManagerPort() {
             val response = client.newCall(request).execute()
             return if (response.isSuccessful) {
                 response.body?.string()
-                    ?.let { Jackson.asA(it, StatusResponse::class).status == RunnerStatus.READY }
-                    ?: false
-            } else false
+                    ?.let { Jackson.asA(it, StatusResponse::class) }
+            } else null
         } catch (_: IOException) {
-            false
+            null
         }
     }
 }

@@ -14,6 +14,7 @@ import org.http4k.routing.routes
 import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
+import pl.edu.prz.kod.mediator.adapters.http.filter.RequestSourceFilter
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
@@ -30,9 +31,12 @@ class HttpHandler {
         routes += executeRoute()
     }
 
+    private val requestSourceHandler = RequestSourceFilter()
+        .then(routesContract)
+
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }
-        .then(routes(routesContract))
+        .then(requestSourceHandler)
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {

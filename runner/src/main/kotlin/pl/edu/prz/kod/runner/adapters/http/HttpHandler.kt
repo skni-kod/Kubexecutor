@@ -6,7 +6,6 @@ import org.http4k.core.Status.Companion.OK
 import org.http4k.format.Jackson
 import org.http4k.contract.openapi.ApiInfo
 import org.http4k.contract.openapi.v2.OpenApi2
-import org.http4k.core.Status.Companion.SERVICE_UNAVAILABLE
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.RoutingHttpHandler
@@ -15,11 +14,13 @@ import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.runner.adapters.http.dto.*
-import pl.edu.prz.kod.runner.domain.Code
-import pl.edu.prz.kod.runner.domain.ExecutionResult
 import pl.edu.prz.kod.runner.ports.ExecutorOrchestratorPort
 import pl.edu.prz.kod.common.adapters.http.dto.StatusResponse
 import pl.edu.prz.kod.common.domain.RunnerStatus
+import pl.edu.prz.kod.runner.adapters.http.filter.RequestSourceFilter
+import pl.edu.prz.kod.runner.adapters.http.filter.RunnerStatusFilter
+import pl.edu.prz.kod.runner.domain.*
+import java.net.InetAddress
 import java.util.*
 
 class HttpHandler {
@@ -40,9 +41,15 @@ class HttpHandler {
         routes += statusRoute()
     }
 
+    private val statusHandler = RunnerStatusFilter { runnerStatus }
+        .then(routesContract)
+
+    private val requestSourceHandler = RequestSourceFilter()
+        .then(statusHandler)
+
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }
-        .then(routes(routesContract))
+        .then(routes(requestSourceHandler))
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
@@ -59,7 +66,7 @@ class HttpHandler {
         .then(eventsHandler)
 
     private fun executeRoute(): ContractRoute {
-        val spec = "/execute" meta {
+        val spec = EXECUTE_PATH meta {
             summary = "Executes code request"
             receiving(
                 executeRequestLens to CodeRequest(
@@ -78,54 +85,53 @@ class HttpHandler {
         } bindContract Method.POST
 
         fun execute() = { request: Request ->
-            if (runnerStatus == RunnerStatus.READY) {
-                runnerStatus = RunnerStatus.EXECUTING
-                val codeRequest = executeRequestLens.extract(request)
-                logEvent(
-                    ReceivedCodeRequestEvent(
-                        code = codeRequest.base64Code,
-                        language = codeRequest.language
-                    )
+            runnerStatus = RunnerStatus.EXECUTING
+            val codeRequest = executeRequestLens.extract(request)
+            logEvent(
+                ReceivedCodeRequestEvent(
+                    code = codeRequest.base64Code,
+                    language = codeRequest.language
                 )
-                val result = when (val decodingResult = codeRequest.decode(base64Decoder)) {
-                    is DecodingResult.Successful -> {
-                        val code = decodingResult.code
-                        logEvent(
-                            DecodedCodeEvent(
-                                code = code.textValue,
-                                language = code.language
-                            )
+            )
+            val result = when (val decodingResult = codeRequest.decode(base64Decoder)) {
+                is DecodingResult.Successful -> {
+                    val code = decodingResult.code
+                    logEvent(
+                        DecodedCodeEvent(
+                            code = code.textValue,
+                            language = code.language
                         )
-                        executeDecoded(code)
-                    }
-
-                    is DecodingResult.Failure -> errorHandler.handleDecodingError(decodingResult)
+                    )
+                    executeDecoded(code)
                 }
-                runnerStatus = RunnerStatus.RESTARTING
-                result
-            } else {
-                Response(SERVICE_UNAVAILABLE).body("Executor not in ready status")
+
+                is DecodingResult.Failure -> errorHandler.handleDecodingError(decodingResult)
             }
+            runnerStatus =
+                if (STATUSES_REQUIRING_RESTART.contains(result.status)) RunnerStatus.RESTARTING
+                else RunnerStatus.READY
+            result
         }
 
         return spec to ::execute
     }
 
     private fun statusRoute(): ContractRoute {
-        val spec = "/status" meta {
+        val spec = STATUS_PATH meta {
             summary = "Gets current status of executor"
             returning(
                 OK,
                 statusResponseLens to StatusResponse(
-                    RunnerStatus.READY
+                    RunnerStatus.READY,
+                    "192.168.1.1"
                 )
             )
         } bindContract Method.GET
 
         fun getStatus() = { _: Request ->
             statusResponseLens.inject(
-                StatusResponse(runnerStatus),
-                if (runnerStatus == RunnerStatus.READY) Response(OK) else Response(SERVICE_UNAVAILABLE)
+                StatusResponse(runnerStatus, InetAddress.getLocalHost().hostAddress),
+                Response(OK)
             )
         }
 

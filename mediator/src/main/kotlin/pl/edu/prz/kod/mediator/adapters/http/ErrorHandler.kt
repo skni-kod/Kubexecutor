@@ -26,6 +26,11 @@ class ErrorHandler {
         }
     }
 
+    fun handleRequestRejectedError(reason: String, status: Status): Response {
+        logEvent(RequestRejectedEvent(reason))
+        return errorResponseLens.inject(ErrorResponse(reason), Response(status))
+    }
+
     //    Handle future exceptions here
     fun handleException(throwable: Throwable): Response {
         logEvent(ExceptionEvent(throwable))

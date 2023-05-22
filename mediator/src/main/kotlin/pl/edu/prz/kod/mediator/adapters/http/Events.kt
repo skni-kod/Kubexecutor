@@ -15,6 +15,7 @@ val logEvent =
 
 data class HttpRequestEvent(val uri: Uri, val status: Int, val duration: Long) : Event
 data class RunnerReadyEvent(val runnerName: String) : Event
+data class RequestRejectedEvent(val reason: String): Event
 data class RequestAssignedToRunnerEvent(val runnerName: String) : Event
 data class ExecutionFailedEvent(val message: String): Event
 data class ExceptionEvent(val exception: Throwable): Event
