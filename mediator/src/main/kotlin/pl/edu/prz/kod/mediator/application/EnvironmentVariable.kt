@@ -14,7 +14,7 @@ class EnvironmentVariable {
 
         @JvmStatic
         fun getRunnerInstances() =
-            BaseEnvironmentVariable.getIntValue("RUNNER_INSTANCES", 2)
+            BaseEnvironmentVariable.getIntValue("RUNNER_INSTANCES", 1)
 
         @JvmStatic
         fun getPathFormat() =

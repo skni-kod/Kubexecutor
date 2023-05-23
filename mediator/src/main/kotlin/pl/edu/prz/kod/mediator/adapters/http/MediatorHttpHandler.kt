@@ -10,17 +10,16 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.format.Jackson
 import org.http4k.routing.RoutingHttpHandler
-import org.http4k.routing.routes
-import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
-class HttpHandler {
-    private val errorHandler by inject<ErrorHandler>(ErrorHandler::class.java)
-    private val runnerManager by inject<RunnerManagerPort>(RunnerManagerPort::class.java)
-
+class MediatorHttpHandler(
+    private val errorHandler: ErrorHandler,
+    private val runnerManager: RunnerManagerPort
+) {
+//    TODO: inject these
     private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
     private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
 
@@ -32,7 +31,7 @@ class HttpHandler {
 
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }
-        .then(routes(routesContract))
+        .then(routesContract)
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
@@ -43,7 +42,7 @@ class HttpHandler {
                     duration = it.duration.toMillis()
                 )
             )
-        }.then(routes(exceptionCatchingHandler))
+        }.then(exceptionCatchingHandler)
 
     val tracingHandler: RoutingHttpHandler = ServerFilters.RequestTracing()
         .then(eventsHandler)

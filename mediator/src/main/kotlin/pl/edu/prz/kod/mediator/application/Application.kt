@@ -1,33 +1,37 @@
 package pl.edu.prz.kod.mediator.application
 
+import org.http4k.client.OkHttp
+import org.http4k.core.HttpHandler
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.inject
-import pl.edu.prz.kod.mediator.adapters.adaptersModule
 import pl.edu.prz.kod.mediator.adapters.http.ApplicationStartedEvent
-import pl.edu.prz.kod.mediator.adapters.http.HttpHandler
+import pl.edu.prz.kod.mediator.adapters.http.ErrorHandler
+import pl.edu.prz.kod.mediator.adapters.http.MediatorHttpHandler
 import pl.edu.prz.kod.mediator.adapters.http.logEvent
-import pl.edu.prz.kod.mediator.domain.domainModule
+import pl.edu.prz.kod.mediator.domain.RunnerManager
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
 fun main() {
     startKoin {
         modules(
-            adaptersModule,
-            applicationModule,
-            domainModule
+            module {
+                single<HttpHandler> { OkHttp()  }
+                single { ErrorHandler() }
+                single<RunnerManagerPort> { RunnerManager(get()) }
+                singleOf(::MediatorHttpHandler)
+            }
         )
     }
 
     val httpPort = EnvironmentVariable.getHttpPort()
-
-    HttpHandler()
+    inject<MediatorHttpHandler>(MediatorHttpHandler::class.java).value
         .tracingHandler
         .asServer(Netty(port = httpPort))
         .start()
-
     logEvent(ApplicationStartedEvent(httpPort))
 
-    inject<RunnerManagerPort>(RunnerManagerPort::class.java).value.initialize()
 }

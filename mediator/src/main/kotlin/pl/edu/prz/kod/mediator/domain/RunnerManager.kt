@@ -1,35 +1,40 @@
 package pl.edu.prz.kod.mediator.domain
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
+import org.http4k.core.HttpHandler
+import org.http4k.core.Method
+import org.http4k.core.Request
+import org.http4k.core.Status
 import org.http4k.format.Jackson
-import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
-import pl.edu.prz.kod.common.adapters.http.dto.StatusResponse
 import pl.edu.prz.kod.mediator.application.EnvironmentVariable
 import pl.edu.prz.kod.common.domain.RunnerStatus
 import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
 import pl.edu.prz.kod.mediator.adapters.http.RunnerReadyEvent
 import pl.edu.prz.kod.mediator.adapters.http.logEvent
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class RunnerManager : RunnerManagerPort() {
-    private val client by inject<OkHttpClient>(OkHttpClient::class.java)
-
+class RunnerManager(
+    private val client: HttpHandler
+) : RunnerManagerPort() {
     private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
 
+// TODO: inject these
     private val runnerInstances = EnvironmentVariable.getRunnerInstances()
     private val runnerName = EnvironmentVariable.getRunnerPodName()
     private val pathFormat = EnvironmentVariable.getPathFormat()
     private val statusQueryPeriod = EnvironmentVariable.getStatusQueryPeriod()
 
-    override fun initialize() {
+//    TODO: inject these
+    private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
+    private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
+    private val errorResponseLens = Jackson.autoBody<ErrorResponse>().toLens()
+
+    init {
+
         (0 until runnerInstances).forEach {
             runnersState["$runnerName-${it}"] = RunnerStatus.RESTARTING
         }
@@ -41,47 +46,38 @@ class RunnerManager : RunnerManagerPort() {
         }, 0, statusQueryPeriod)
     }
 
-    override fun execute(codeRequest: CodeRequest): ExecuteRequestResult {
-        val freeRunner = runnersState
+    override fun execute(codeRequest: CodeRequest): ExecuteRequestResult =
+        runnersState
             .filterValues { it == RunnerStatus.READY }
             .firstNotNullOfOrNull { it.key }
-
-        return if (freeRunner == null) {
-            ExecuteRequestResult.Failure.NoRunnerAvailable()
-        } else {
-            logEvent(RequestAssignedToRunnerEvent(freeRunner))
-            runnersState[freeRunner] = RunnerStatus.EXECUTING
-            val requestResult = sendExecuteRequestToRunner(freeRunner, codeRequest)
-            runnersState[freeRunner] = RunnerStatus.RESTARTING
-            requestResult
-        }
-    }
+            ?.let {
+                logEvent(RequestAssignedToRunnerEvent(it))
+                runnersState[it] = RunnerStatus.EXECUTING
+                val requestResult = sendExecuteRequestToRunner(it, codeRequest)
+                runnersState[it] = RunnerStatus.RESTARTING
+                requestResult
+            } ?: ExecuteRequestResult.Failure.NoRunnerAvailable()
 
     private fun sendExecuteRequestToRunner(runner: String, codeRequest: CodeRequest): ExecuteRequestResult {
-        val requestBody = Jackson.asFormatString(codeRequest).toRequestBody()
-        val request = Request.Builder()
-            .url(String.format(pathFormat, runner) + "/execute")
-            .post(requestBody)
-            .build()
-        return try {
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                response.body?.string()
-                    ?.let { ExecuteRequestResult.Success(Jackson.asA(it, CodeResponse::class)) }
-                    ?: ExecuteRequestResult.Failure.NoReplyFromRunner()
-            } else {
-                response.body?.string()
-                    ?.let {
-                        ExecuteRequestResult.Failure.ErrorReplyFromRunner(
-                            Jackson.asA(it, ErrorResponse::class),
-                            response.code,
-                            response.message
-                        )
-                    }
-                    ?: ExecuteRequestResult.Failure.NoReplyFromRunner()
-            }
-        } catch (_: IOException) {
-            ExecuteRequestResult.Failure.NoReplyFromRunner()
+        val response = client(
+            executeRequestLens(
+                codeRequest,
+                Request(
+                    Method.POST,
+                    String.format(pathFormat, runner) + "/execute"
+                )
+            )
+        )
+
+        return when {
+            response.status.successful -> ExecuteRequestResult.Success(executeResponseLens(response))
+            response.status == Status.REQUEST_TIMEOUT -> ExecuteRequestResult.Failure.ExecutionTimeout()
+            response.status.clientError -> ExecuteRequestResult.Failure.ErrorReplyFromRunner(
+                errorResponseLens(response),
+                response.status
+            )
+
+            else -> ExecuteRequestResult.Failure.NoReplyFromRunner()
         }
     }
 
@@ -96,19 +92,12 @@ class RunnerManager : RunnerManagerPort() {
             }
     }
 
-    private fun isRunnerReady(runner: String): Boolean {
-        val request = Request.Builder()
-            .url(String.format(pathFormat, runner) + "/status")
-            .build()
-        return try {
-            val response = client.newCall(request).execute()
-            return if (response.isSuccessful) {
-                response.body?.string()
-                    ?.let { Jackson.asA(it, StatusResponse::class).status == RunnerStatus.READY }
-                    ?: false
-            } else false
-        } catch (_: IOException) {
-            false
-        }
-    }
+    private fun isRunnerReady(runner: String): Boolean =
+        client(
+            Request(
+                Method.GET,
+                String.format(pathFormat, runner) + "/status"
+            )
+        ).status.successful
+
 }
