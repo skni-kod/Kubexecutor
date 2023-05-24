@@ -23,6 +23,12 @@ spec:
           env:
             - name: RUNNER_INSTANCES
               value: "10"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - all
 ---
 apiVersion: v1
 kind: Service
