@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 class RunnerManager : RunnerManagerPort() {
     private val client by inject<OkHttpClient>(OkHttpClient::class.java)
 
-    private val runnersInfo: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
+    private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
 
     private val runnerInstances = EnvironmentVariable.getRunnerInstances()
     private val runnerName = EnvironmentVariable.getRunnerPodName()
@@ -31,7 +31,7 @@ class RunnerManager : RunnerManagerPort() {
 
     override fun initialize() {
         (0 until runnerInstances).forEach {
-            runnersInfo["$runnerName-${it}"] = RunnerStatus.RESTARTING
+            runnersState["$runnerName-${it}"] = RunnerStatus.RESTARTING
         }
 
         Timer().scheduleAtFixedRate(object : TimerTask() {
@@ -42,7 +42,7 @@ class RunnerManager : RunnerManagerPort() {
     }
 
     override fun execute(codeRequest: CodeRequest): ExecuteRequestResult {
-        val freeRunner = runnersInfo
+        val freeRunner = runnersState
             .filterValues { it == RunnerStatus.READY }
             .firstNotNullOfOrNull { it.key }
 
@@ -50,9 +50,9 @@ class RunnerManager : RunnerManagerPort() {
             ExecuteRequestResult.Failure.NoRunnerAvailable()
         } else {
             logEvent(RequestAssignedToRunnerEvent(freeRunner))
-            runnersInfo[freeRunner] = RunnerStatus.EXECUTING
+            runnersState[freeRunner] = RunnerStatus.EXECUTING
             val requestResult = sendExecuteRequestToRunner(freeRunner, codeRequest)
-            runnersInfo[freeRunner] = RunnerStatus.RESTARTING
+            runnersState[freeRunner] = RunnerStatus.RESTARTING
             requestResult
         }
     }
@@ -87,11 +87,11 @@ class RunnerManager : RunnerManagerPort() {
 
 
     private fun updateRunnersState() {
-        runnersInfo
+        runnersState
             .filterValues { it == RunnerStatus.RESTARTING }
             .filter { isRunnerReady(it.key) }
             .forEach {
-                runnersInfo[it.key] = RunnerStatus.READY
+                runnersState[it.key] = RunnerStatus.READY
                 logEvent(RunnerReadyEvent(it.key))
             }
     }
