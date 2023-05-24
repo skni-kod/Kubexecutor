@@ -5,6 +5,5 @@ import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 
 abstract class RunnerManagerPort {
     abstract fun initialize()
-    abstract fun getRunnersIpAddresses(): List<String>
     abstract fun execute(codeRequest: CodeRequest): ExecuteRequestResult
 }

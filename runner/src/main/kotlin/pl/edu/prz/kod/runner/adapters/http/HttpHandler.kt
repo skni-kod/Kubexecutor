@@ -17,10 +17,8 @@ import pl.edu.prz.kod.runner.adapters.http.dto.*
 import pl.edu.prz.kod.runner.ports.ExecutorOrchestratorPort
 import pl.edu.prz.kod.common.adapters.http.dto.StatusResponse
 import pl.edu.prz.kod.common.domain.RunnerStatus
-import pl.edu.prz.kod.runner.adapters.http.filter.RequestSourceFilter
 import pl.edu.prz.kod.runner.adapters.http.filter.RunnerStatusFilter
 import pl.edu.prz.kod.runner.domain.*
-import java.net.InetAddress
 import java.util.*
 
 class HttpHandler {
@@ -44,12 +42,9 @@ class HttpHandler {
     private val statusHandler = RunnerStatusFilter { runnerStatus }
         .then(routes(routesContract))
 
-    private val requestSourceHandler = RequestSourceFilter()
-        .then(statusHandler)
-
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }
-        .then(requestSourceHandler)
+        .then(statusHandler)
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
@@ -121,18 +116,12 @@ class HttpHandler {
             summary = "Gets current status of executor"
             returning(
                 OK,
-                statusResponseLens to StatusResponse(
-                    RunnerStatus.READY,
-                    "192.168.1.1"
-                )
+                statusResponseLens to StatusResponse(RunnerStatus.READY)
             )
         } bindContract Method.GET
 
         fun getStatus() = { _: Request ->
-            statusResponseLens.inject(
-                StatusResponse(runnerStatus, InetAddress.getLocalHost().hostAddress),
-                Response(OK)
-            )
+            statusResponseLens.inject(StatusResponse(runnerStatus), Response(OK))
         }
 
         return spec to ::getStatus
