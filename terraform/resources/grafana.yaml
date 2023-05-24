@@ -5,3 +5,16 @@ datasources:
       - name: Loki
         type: loki
         url: http://loki:3100
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server:80
+dashboards:
+  default:
+    node-exporter-full:
+      gnetId: 1860
+      revision: 31
+      datasource: Prometheus
+    prometheus-stats:
+      gnetId: 315
+      revision: 3
+      datasource: Prometheus
