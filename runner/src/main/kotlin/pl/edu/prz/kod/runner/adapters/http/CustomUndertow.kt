@@ -3,27 +3,24 @@ package pl.edu.prz.kod.runner.adapters.http
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
-import io.undertow.server.handlers.GracefulShutdownHandler
 import org.http4k.core.HttpHandler
 import org.http4k.server.ServerConfig.StopMode
 import org.http4k.server.Http4kServer
 import org.http4k.server.Http4kUndertowHttpHandler
 import org.http4k.server.ServerConfig
+import pl.edu.prz.kod.runner.domain.EXECUTE_PATH
+import pl.edu.prz.kod.runner.domain.STATUSES_REQUIRING_RESTART
 import java.net.InetSocketAddress
+import kotlin.system.exitProcess
 
 class CustomUndertow(
     val port: Int = 8000,
     override val stopMode: StopMode = StopMode.Immediate
 ) : ServerConfig {
     override fun toServer(http: HttpHandler): Http4kServer {
-        val httpHandler =
-            (http).let(::Http4kUndertowHttpHandler).let(::BlockingHandler).let { handler ->
-                if (stopMode is StopMode.Graceful) {
-                    GracefulShutdownHandler(handler)
-                } else {
-                    handler
-                }
-            }.let(::RunnerShuttingHandler)
+        val httpHandler = (http).let(::Http4kUndertowHttpHandler)
+            .let(::BlockingHandler)
+            .let(::RunnerShuttingHandler)
 
         return object : Http4kServer {
             val server = Undertow.builder()
@@ -33,13 +30,7 @@ class CustomUndertow(
 
             override fun start() = apply { server.start() }
 
-            override fun stop() = apply {
-                (httpHandler as? GracefulShutdownHandler)?.apply {
-                    shutdown()
-                    awaitShutdown((stopMode as StopMode.Graceful).timeout.toMillis())
-                }
-                server.stop()
-            }
+            override fun stop() = apply { server.stop() }
 
             override fun port(): Int = when {
                 port > 0 -> port
@@ -51,10 +42,11 @@ class CustomUndertow(
 
 class RunnerShuttingHandler(private val handler: io.undertow.server.HttpHandler) : io.undertow.server.HttpHandler {
     override fun handleRequest(exchange: HttpServerExchange?) {
-        exchange?.addExchangeCompleteListener { exchange, nextListener ->
-            if (exchange.requestPath == "/execute") {
-                exchange.endExchange()
-                System.exit(0)
+        exchange?.addExchangeCompleteListener { innerExchange, nextListener ->
+            if (innerExchange.requestPath == EXECUTE_PATH &&
+                STATUSES_REQUIRING_RESTART.map { it.code }.contains(innerExchange.statusCode)) {
+                innerExchange.endExchange()
+                exitProcess(0)
             }
             nextListener.proceed()
         }

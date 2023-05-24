@@ -1,0 +1,39 @@
+services:
+  kubexecutor-frontend:
+    image: kubexecutor-frontend:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - kubexecutor-network
+    environment:
+      - EXECUTE_ENDPOINT=http://kubexecutor-mediator:8081/execute
+  kubexecutor-mediator:
+    image: kubexecutor-mediator:latest
+#    ports:
+#      - "8081:8081"
+    networks:
+      - kubexecutor-network
+    environment:
+      - RUNNER_POD_NAME=kubexecutor-runner
+      - PATH_FORMAT=http://%s:8080
+      - RUNNER_INSTANCES=2
+  kubexecutor-runner-0:
+    image: kubexecutor-runner:latest
+#    ports:
+#      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - kubexecutor-network
+    environment:
+      - SYSTEM_COMMAND_TIMEOUT=20000
+  kubexecutor-runner-1:
+    image: kubexecutor-runner:latest
+#    ports:
+#      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - kubexecutor-network
+    environment:
+      - SYSTEM_COMMAND_TIMEOUT=20000
+networks:
+  kubexecutor-network: {}
