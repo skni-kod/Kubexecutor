@@ -10,7 +10,7 @@ images:
   - name: musiek/mediator
     newTag: '0.22'
   - name: musiek/frontend
-    newTag: '0.01'
+    newTag: '0.02'
 
 replicas:
   - name: runner

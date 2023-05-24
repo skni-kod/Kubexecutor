@@ -25,7 +25,6 @@ spec:
               value: http://mediator.app.svc.cluster.local:8081/execute
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - all
