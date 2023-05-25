@@ -4,7 +4,6 @@ import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
 import org.http4k.core.HttpHandler
-import org.http4k.server.ServerConfig.StopMode
 import org.http4k.server.Http4kServer
 import org.http4k.server.Http4kUndertowHttpHandler
 import org.http4k.server.ServerConfig
@@ -14,8 +13,7 @@ import java.net.InetSocketAddress
 import kotlin.system.exitProcess
 
 class CustomUndertow(
-    val port: Int = 8000,
-    override val stopMode: StopMode = StopMode.Immediate
+    val port: Int = 8000
 ) : ServerConfig {
     override fun toServer(http: HttpHandler): Http4kServer {
         val httpHandler = (http).let(::Http4kUndertowHttpHandler)

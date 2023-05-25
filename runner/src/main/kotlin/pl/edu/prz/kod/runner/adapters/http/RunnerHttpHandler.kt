@@ -10,7 +10,6 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.routes
-import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.runner.adapters.http.dto.*
@@ -21,16 +20,16 @@ import pl.edu.prz.kod.runner.adapters.http.filter.RunnerStatusFilter
 import pl.edu.prz.kod.runner.domain.*
 import java.util.*
 
-class HttpHandler {
-    private val base64Decoder by inject<Base64.Decoder>(Base64.Decoder::class.java)
-    private val errorHandler by inject<ErrorHandler>(ErrorHandler::class.java)
-    private val executorOrchestrator by inject<ExecutorOrchestratorPort>(ExecutorOrchestratorPort::class.java)
-
-    private var runnerStatus = RunnerStatus.READY
-
+class RunnerHttpHandler(
+    private val base64Decoder: Base64.Decoder,
+    private val errorHandler: ErrorHandler,
+    private val executorOrchestrator: ExecutorOrchestratorPort
+) {
     private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
     private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
     private val statusResponseLens = Jackson.autoBody<StatusResponse>().toLens()
+
+    private var runnerStatus = RunnerStatus.READY
 
     private val routesContract = contract {
         renderer = OpenApi2(ApiInfo("Kubexecutor Runner API", "v1.0"), Jackson)
