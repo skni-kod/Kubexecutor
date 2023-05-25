@@ -1,7 +1,6 @@
 package pl.edu.prz.kod.runner.application
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.http4k.server.Undertow
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
