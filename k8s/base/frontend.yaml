@@ -23,6 +23,11 @@ spec:
           env:
             - name: EXECUTE_ENDPOINT
               value: http://mediator.app.svc.cluster.local:8081/execute
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - all
 ---
 apiVersion: v1
 kind: Service

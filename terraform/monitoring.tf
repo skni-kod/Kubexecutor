@@ -38,3 +38,14 @@ resource "helm_release" "promtail" {
   create_namespace = true
 
 }
+
+resource "helm_release" "prometheus" {
+  name  = "prometheus"
+
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "prometheus"
+  namespace        = "monitoring"
+  version          = "22.4.1"
+  create_namespace = true
+
+}
