@@ -10,6 +10,7 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.routes
+import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.runner.adapters.http.dto.*
@@ -23,12 +24,9 @@ import java.util.*
 class RunnerHttpHandler(
     private val base64Decoder: Base64.Decoder,
     private val errorHandler: ErrorHandler,
-    private val executorOrchestrator: ExecutorOrchestratorPort
+    private val executorOrchestrator: ExecutorOrchestratorPort,
+    private val lenses: Lenses
 ) {
-    private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
-    private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
-    private val statusResponseLens = Jackson.autoBody<StatusResponse>().toLens()
-
     private var runnerStatus = RunnerStatus.READY
 
     private val routesContract = contract {
@@ -63,14 +61,14 @@ class RunnerHttpHandler(
         val spec = EXECUTE_PATH meta {
             summary = "Executes code request"
             receiving(
-                executeRequestLens to CodeRequest(
+                lenses.executeRequestLens to CodeRequest(
                     base64Code = "cHJpbnQoImhlbGxvLCB3b3JsZCEiKQ==",
                     language = "python"
                 )
             )
             returning(
                 OK,
-                executeResponseLens to CodeResponse(
+                lenses.executeResponseLens to CodeResponse(
                     stdout = "hello,world!",
                     stdErr = "",
                     exitCode = 0
@@ -80,7 +78,7 @@ class RunnerHttpHandler(
 
         fun execute() = { request: Request ->
             runnerStatus = RunnerStatus.EXECUTING
-            val codeRequest = executeRequestLens.extract(request)
+            val codeRequest = lenses.executeRequestLens.extract(request)
             logEvent(
                 ReceivedCodeRequestEvent(
                     code = codeRequest.base64Code,
@@ -115,12 +113,12 @@ class RunnerHttpHandler(
             summary = "Gets current status of executor"
             returning(
                 OK,
-                statusResponseLens to StatusResponse(RunnerStatus.READY)
+                lenses.statusResponseLens to StatusResponse(RunnerStatus.READY)
             )
         } bindContract Method.GET
 
         fun getStatus() = { _: Request ->
-            statusResponseLens.inject(StatusResponse(runnerStatus), Response(OK))
+            lenses.statusResponseLens.inject(StatusResponse(runnerStatus), Response(OK))
         }
 
         return spec to ::getStatus
@@ -136,7 +134,7 @@ class RunnerHttpHandler(
                         exitCode = result.exitCode
                     )
                 )
-                executeResponseLens.inject(result.encode(), Response(OK))
+                lenses.executeResponseLens.inject(result.encode(), Response(OK))
             }
 
             is ExecutionResult.Failure -> errorHandler.handleExecutionError(result)

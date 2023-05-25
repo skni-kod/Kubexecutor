@@ -6,6 +6,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.inject
+import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.runner.adapters.http.*
 import pl.edu.prz.kod.runner.domain.executor.ExecutorOrchestrator
 import pl.edu.prz.kod.runner.domain.executor.JavaExecutor
@@ -18,6 +19,7 @@ fun main() {
     startKoin {
         modules(
             module {
+                single { Lenses() }
                 single { Configuration() }
                 single<Base64.Decoder> { Base64.getDecoder() }
                 single { ObjectMapper() }

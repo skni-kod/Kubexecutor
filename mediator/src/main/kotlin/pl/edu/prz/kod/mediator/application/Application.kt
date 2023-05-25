@@ -8,6 +8,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.inject
+import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.mediator.adapters.http.ApplicationStartedEvent
 import pl.edu.prz.kod.mediator.adapters.http.ErrorHandler
 import pl.edu.prz.kod.mediator.adapters.http.MediatorHttpHandler
@@ -19,10 +20,11 @@ fun main() {
     startKoin {
         modules(
             module {
+                single { Lenses() }
                 single { Configuration() }
-                single<HttpHandler> { OkHttp()  }
+                single<HttpHandler> { OkHttp() }
                 single { ErrorHandler() }
-                single<RunnerManagerPort> { RunnerManager(get(), get()) }
+                single<RunnerManagerPort> { RunnerManager(get(), get(), get()) }
                 singleOf(::MediatorHttpHandler)
             }
         )

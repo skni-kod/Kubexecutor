@@ -1,3 +1,5 @@
+val http4k_version = "4.41.4.0"
+
 plugins {
     kotlin("jvm") version "1.8.10"
 }
@@ -10,4 +12,5 @@ repositories {
 }
 
 dependencies {
+    implementation("org.http4k:http4k-format-jackson:$http4k_version")
 }

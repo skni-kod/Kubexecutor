@@ -4,10 +4,8 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.core.Request
-import org.http4k.format.Jackson
+import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
-import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
-import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
 import pl.edu.prz.kod.common.domain.RunnerStatus
 import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
 import pl.edu.prz.kod.mediator.adapters.http.RunnerReadyEvent
@@ -19,14 +17,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 class RunnerManager(
     private val client: HttpHandler,
-    private val configuration: Configuration
+    private val configuration: Configuration,
+    private val lenses: Lenses
 ) : RunnerManagerPort() {
-
-//    TODO: inject these
-    private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
-    private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
-    private val errorResponseLens = Jackson.autoBody<ErrorResponse>().toLens()
-
     private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
 
     init {
@@ -56,7 +49,7 @@ class RunnerManager(
 
     private fun sendExecuteRequestToRunner(runner: String, codeRequest: CodeRequest): ExecuteRequestResult {
         val response = client(
-            executeRequestLens(
+            lenses.executeRequestLens(
                 codeRequest,
                 Request(
                     Method.POST,
@@ -66,10 +59,10 @@ class RunnerManager(
         )
 
         return when {
-            response.status.successful -> ExecuteRequestResult.Success(executeResponseLens(response))
+            response.status.successful -> ExecuteRequestResult.Success(lenses.executeResponseLens(response))
             response.status == Status.REQUEST_TIMEOUT -> ExecuteRequestResult.Failure.ExecutionTimeout()
             response.status.clientError -> ExecuteRequestResult.Failure.ErrorReplyFromRunner(
-                errorResponseLens(response),
+                lenses.errorResponseLens(response),
                 response.status
             )
 
