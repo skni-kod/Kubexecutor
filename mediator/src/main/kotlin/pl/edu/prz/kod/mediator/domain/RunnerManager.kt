@@ -2,48 +2,44 @@ package pl.edu.prz.kod.mediator.domain
 
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
-import org.http4k.core.Request
 import org.http4k.core.Status
+import org.http4k.core.Request
 import org.http4k.format.Jackson
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
-import pl.edu.prz.kod.mediator.application.EnvironmentVariable
 import pl.edu.prz.kod.common.domain.RunnerStatus
 import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
 import pl.edu.prz.kod.mediator.adapters.http.RunnerReadyEvent
 import pl.edu.prz.kod.mediator.adapters.http.logEvent
+import pl.edu.prz.kod.mediator.application.Configuration
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class RunnerManager(
-    private val client: HttpHandler
+    private val client: HttpHandler,
+    private val configuration: Configuration
 ) : RunnerManagerPort() {
-    private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
-
-// TODO: inject these
-    private val runnerInstances = EnvironmentVariable.getRunnerInstances()
-    private val runnerName = EnvironmentVariable.getRunnerPodName()
-    private val pathFormat = EnvironmentVariable.getPathFormat()
-    private val statusQueryPeriod = EnvironmentVariable.getStatusQueryPeriod()
 
 //    TODO: inject these
     private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
     private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
     private val errorResponseLens = Jackson.autoBody<ErrorResponse>().toLens()
 
+    private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
+
     init {
 
-        (0 until runnerInstances).forEach {
-            runnersState["$runnerName-${it}"] = RunnerStatus.RESTARTING
+        (0 until configuration.runnerInstances).forEach {
+            runnersState["${configuration.runnerPodName}-${it}"] = RunnerStatus.RESTARTING
         }
 
         Timer().scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 updateRunnersState()
             }
-        }, 0, statusQueryPeriod)
+        }, 0, configuration.runnerStatusQueryPeriod)
     }
 
     override fun execute(codeRequest: CodeRequest): ExecuteRequestResult =
@@ -64,7 +60,7 @@ class RunnerManager(
                 codeRequest,
                 Request(
                     Method.POST,
-                    String.format(pathFormat, runner) + "/execute"
+                    String.format(configuration.runnerPathFormat, runner) + "/execute"
                 )
             )
         )
@@ -96,7 +92,7 @@ class RunnerManager(
         client(
             Request(
                 Method.GET,
-                String.format(pathFormat, runner) + "/status"
+                String.format(configuration.runnerPathFormat, runner) + "/status"
             )
         ).status.successful
 

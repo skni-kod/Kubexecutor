@@ -19,19 +19,20 @@ fun main() {
     startKoin {
         modules(
             module {
+                single { Configuration() }
                 single<HttpHandler> { OkHttp()  }
                 single { ErrorHandler() }
-                single<RunnerManagerPort> { RunnerManager(get()) }
+                single<RunnerManagerPort> { RunnerManager(get(), get()) }
                 singleOf(::MediatorHttpHandler)
             }
         )
     }
 
-    val httpPort = EnvironmentVariable.getHttpPort()
+    val configuration = inject<Configuration>(Configuration::class.java).value
     inject<MediatorHttpHandler>(MediatorHttpHandler::class.java).value
         .tracingHandler
-        .asServer(Netty(port = httpPort))
+        .asServer(Netty(port = configuration.httpPort))
         .start()
-    logEvent(ApplicationStartedEvent(httpPort))
+    logEvent(ApplicationStartedEvent(configuration.httpPort))
 
 }
