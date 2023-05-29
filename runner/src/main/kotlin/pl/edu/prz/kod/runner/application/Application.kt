@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.Lenses
@@ -23,11 +24,11 @@ fun main() {
                 single { Configuration() }
                 single<Base64.Decoder> { Base64.getDecoder() }
                 single { ObjectMapper() }
-                single { ErrorHandler() }
-                single { PythonExecutor(get()) }
-                single { JavaExecutor(get()) }
-                single { NodeJSExecutor(get()) }
-                single<ExecutorOrchestratorPort> { ExecutorOrchestrator(get(), get(), get()) }
+                singleOf(::ErrorHandler)
+                singleOf(::PythonExecutor)
+                singleOf(::JavaExecutor)
+                singleOf(::NodeJSExecutor)
+                singleOf(::ExecutorOrchestrator) bind ExecutorOrchestratorPort::class
                 singleOf(::RunnerHttpHandler)
             }
         )

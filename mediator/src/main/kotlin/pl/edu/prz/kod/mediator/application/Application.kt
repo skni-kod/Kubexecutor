@@ -6,6 +6,7 @@ import org.http4k.server.Netty
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent.inject
 import pl.edu.prz.kod.common.Lenses
@@ -23,8 +24,8 @@ fun main() {
                 single { Lenses() }
                 single { Configuration() }
                 single<HttpHandler> { OkHttp() }
-                single { ErrorHandler() }
-                single<RunnerManagerPort> { RunnerManager(get(), get(), get()) }
+                singleOf(::ErrorHandler)
+                singleOf(::RunnerManager) bind RunnerManagerPort::class
                 singleOf(::MediatorHttpHandler)
             }
         )

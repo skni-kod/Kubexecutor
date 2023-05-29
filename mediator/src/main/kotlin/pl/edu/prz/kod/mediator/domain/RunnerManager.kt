@@ -4,7 +4,9 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.core.Request
+import pl.edu.prz.kod.common.EXECUTE_PATH
 import pl.edu.prz.kod.common.Lenses
+import pl.edu.prz.kod.common.STATUS_PATH
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.domain.RunnerStatus
 import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
@@ -53,7 +55,7 @@ class RunnerManager(
                 codeRequest,
                 Request(
                     Method.POST,
-                    String.format(configuration.runnerPathFormat, runner) + "/execute"
+                    String.format(configuration.runnerPathFormat, runner) + EXECUTE_PATH
                 )
             )
         )
@@ -81,12 +83,14 @@ class RunnerManager(
             }
     }
 
-    private fun isRunnerReady(runner: String): Boolean =
-        client(
+    private fun isRunnerReady(runner: String): Boolean {
+        val response = client(
             Request(
                 Method.GET,
-                String.format(configuration.runnerPathFormat, runner) + "/status"
+                String.format(configuration.runnerPathFormat, runner) + STATUS_PATH
             )
-        ).status.successful
+        )
+        return response.status.successful && lenses.statusResponseLens(response).status == RunnerStatus.READY
+    }
 
 }

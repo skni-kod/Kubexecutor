@@ -1,8 +1,8 @@
 package pl.edu.prz.kod.runner.application
 
-import pl.edu.prz.kod.common.application.BaseEnvironmentVariable
+import pl.edu.prz.kod.common.application.EnvironmentVariable
 
 data class Configuration(
-    val httpPort: Int = BaseEnvironmentVariable.getIntValue("HTTP_PORT", 8080),
-    val systemCommandTimeout: Long = BaseEnvironmentVariable.getLongValue("SYSTEM_COMMAND_TIMEOUT", 5000)
+    val httpPort: Int = EnvironmentVariable.getIntValue("HTTP_PORT", 8080),
+    val systemCommandTimeout: Long = EnvironmentVariable.getLongValue("SYSTEM_COMMAND_TIMEOUT", 5000)
 )

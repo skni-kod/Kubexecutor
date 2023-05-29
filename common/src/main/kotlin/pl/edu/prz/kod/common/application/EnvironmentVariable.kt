@@ -1,6 +1,6 @@
 package pl.edu.prz.kod.common.application
 
-class BaseEnvironmentVariable {
+class EnvironmentVariable {
     companion object {
         @JvmStatic
         fun getIntValue(name: String, defaultValue: Int): Int =

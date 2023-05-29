@@ -10,6 +10,7 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.format.Jackson
 import org.http4k.routing.RoutingHttpHandler
+import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
@@ -17,12 +18,9 @@ import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
 class MediatorHttpHandler(
     private val errorHandler: ErrorHandler,
-    private val runnerManager: RunnerManagerPort
+    private val runnerManager: RunnerManagerPort,
+    private val lenses: Lenses
 ) {
-//    TODO: inject these
-    private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
-    private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
-
     private val routesContract = contract {
         renderer = OpenApi2(ApiInfo("Kubexecutor Mediator API", "v1.0"), Jackson)
         descriptionPath = "/openapi.json"
@@ -51,14 +49,14 @@ class MediatorHttpHandler(
         val spec = "/execute" meta {
             summary = "Executes code request"
             receiving(
-                executeRequestLens to CodeRequest(
+                lenses.executeRequestLens to CodeRequest(
                     base64Code = "cHJpbnQoImhlbGxvLCB3b3JsZCEiKQ==",
                     language = "python"
                 )
             )
             returning(
                 Status.OK,
-                executeResponseLens to CodeResponse(
+                lenses.executeResponseLens to CodeResponse(
                     stdout = "hello,world!",
                     stdErr = "",
                     exitCode = 0
@@ -67,10 +65,10 @@ class MediatorHttpHandler(
         } bindContract Method.POST
 
         fun execute() = { request: Request ->
-            val codeRequest = executeRequestLens.extract(request)
+            val codeRequest = lenses.executeRequestLens.extract(request)
             when (val executeRequestResult = runnerManager.execute(codeRequest)) {
                 is ExecuteRequestResult.Success ->
-                    executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))
+                    lenses.executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))
                 is ExecuteRequestResult.Failure ->
                     errorHandler.handleExecuteRequestError(executeRequestResult)
             }
