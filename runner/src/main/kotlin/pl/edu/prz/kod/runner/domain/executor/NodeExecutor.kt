@@ -1,15 +1,17 @@
 package pl.edu.prz.kod.runner.domain.executor
 
-import pl.edu.prz.kod.common.domain.Language
+import pl.edu.prz.kod.runner.application.Configuration
 import pl.edu.prz.kod.runner.domain.ExecutionResult
 
-class NodeJSExecutor: AbstractExecutor(Language.NODEJS) {
+class NodeJSExecutor(
+    configuration: Configuration
+): AbstractExecutor(configuration) {
 
     override fun execute(code: String): ExecutionResult {
         val escapedCode = getEscapedCode(code)
         val process = runSystemCommand("echo \"$escapedCode\" | node")
         if (process.timedOut()) {
-            return ExecutionResult.Failure.ProcessTimedOutError(timeout)
+            return ExecutionResult.Failure.ProcessTimedOutError(configuration.systemCommandTimeout)
         }
         return ExecutionResult.Success(
             stdout = process.inputStream.bufferedReader().readText(),

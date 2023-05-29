@@ -1,11 +1,13 @@
 package pl.edu.prz.kod.runner.domain.executor
 
 import pl.edu.prz.kod.runner.domain.ExecutionResult
-import pl.edu.prz.kod.common.domain.Language
+import pl.edu.prz.kod.runner.application.Configuration
 import java.io.File
 import java.util.regex.Pattern
 
-class JavaExecutor: AbstractExecutor(Language.JAVA) {
+class JavaExecutor(
+    configuration: Configuration
+): AbstractExecutor(configuration) {
     private val srcDirPath = "/app/executor/src"
     private val buildDirPath = "/app/executor/build"
     private val runDirPath = "/app/executor/run"
@@ -32,7 +34,7 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
 
         val compilationProcess = runSystemCommand("javac -d $buildDirPath ${javaFile.name}", srcDir)
         if (compilationProcess.timedOut()) {
-            return ExecutionResult.Failure.CompilationTimedOutError(timeout)
+            return ExecutionResult.Failure.CompilationTimedOutError(configuration.systemCommandTimeout)
         }
         if (compilationProcess.exitValue() != 0) {
             return ExecutionResult.Failure.CompilationFailedError(compilationProcess.errorStream.bufferedReader().readText())
@@ -40,7 +42,7 @@ class JavaExecutor: AbstractExecutor(Language.JAVA) {
 
         val runProcess = runSystemCommand("java -classpath $buildDirPath $javaPackageName$javaClassName", runDir)
         if (runProcess.timedOut()) {
-            return ExecutionResult.Failure.ProcessTimedOutError(timeout)
+            return ExecutionResult.Failure.ProcessTimedOutError(configuration.systemCommandTimeout)
         }
         return ExecutionResult.Success(
                 stdout = runProcess.inputStream.bufferedReader().readText(),

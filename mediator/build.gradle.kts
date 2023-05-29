@@ -1,7 +1,7 @@
-val logback_version = "1.4.6"
-val koin_version = "3.4.0"
-val jackson_version = "2.14.2"
-val http4k_version = "4.41.4.0"
+val logbackVersion: String by project
+val koinVersion: String by project
+val jacksonVersion: String by project
+val http4kVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -34,18 +34,18 @@ repositories {
 
 dependencies {
     implementation(project(":common"))
-    implementation("io.insert-koin:koin-core:$koin_version")
-    implementation("org.http4k:http4k-bom:$http4k_version")
-    implementation("org.http4k:http4k-core:$http4k_version")
-    implementation("org.http4k:http4k-server-netty:$http4k_version")
-    implementation("org.http4k:http4k-format-jackson:$http4k_version")
-    implementation("org.http4k:http4k-format-core:$http4k_version")
-    implementation("org.http4k:http4k-contract:$http4k_version")
-    implementation("org.http4k:http4k-client-okhttp:$http4k_version")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("org.http4k:http4k-bom:$http4kVersion")
+    implementation("org.http4k:http4k-core:$http4kVersion")
+    implementation("org.http4k:http4k-server-netty:$http4kVersion")
+    implementation("org.http4k:http4k-format-jackson:$http4kVersion")
+    implementation("org.http4k:http4k-format-core:$http4kVersion")
+    implementation("org.http4k:http4k-contract:$http4kVersion")
+    implementation("org.http4k:http4k-client-okhttp:$http4kVersion")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("ch.qos.logback.contrib:logback-json-classic:0.1.5")
     implementation("ch.qos.logback.contrib:logback-jackson:0.1.5")
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jackson_version")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 }
 
 tasks.getByName<Test>("test") {

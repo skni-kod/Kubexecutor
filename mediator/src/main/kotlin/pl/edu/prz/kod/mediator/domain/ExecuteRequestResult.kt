@@ -1,5 +1,6 @@
 package pl.edu.prz.kod.mediator.domain
 
+import org.http4k.core.Status
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
 
@@ -13,10 +14,12 @@ sealed class ExecuteRequestResult {
         class NoReplyFromRunner :
             Failure("No reply received from runner")
 
+        class ExecutionTimeout :
+            Failure("Code execution timeout")
+
         data class ErrorReplyFromRunner(
             val errorResponse: ErrorResponse,
-            val statusCode: Int,
-            val statusDescription: String
+            val statusCode: Status
         ) :
             Failure(errorResponse.message)
     }

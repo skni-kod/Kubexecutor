@@ -10,20 +10,17 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.format.Jackson
 import org.http4k.routing.RoutingHttpHandler
-import org.http4k.routing.routes
-import org.koin.java.KoinJavaComponent.inject
+import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
-class HttpHandler {
-    private val errorHandler by inject<ErrorHandler>(ErrorHandler::class.java)
-    private val runnerManager by inject<RunnerManagerPort>(RunnerManagerPort::class.java)
-
-    private val executeRequestLens = Jackson.autoBody<CodeRequest>().toLens()
-    private val executeResponseLens = Jackson.autoBody<CodeResponse>().toLens()
-
+class MediatorHttpHandler(
+    private val errorHandler: ErrorHandler,
+    private val runnerManager: RunnerManagerPort,
+    private val lenses: Lenses
+) {
     private val routesContract = contract {
         renderer = OpenApi2(ApiInfo("Kubexecutor Mediator API", "v1.0"), Jackson)
         descriptionPath = "/openapi.json"
@@ -32,7 +29,7 @@ class HttpHandler {
 
     private val exceptionCatchingHandler: RoutingHttpHandler = ServerFilters
         .CatchAll { errorHandler.handleException(it) }
-        .then(routes(routesContract))
+        .then(routesContract)
 
     private val eventsHandler =
         ResponseFilters.ReportHttpTransaction {
@@ -43,7 +40,7 @@ class HttpHandler {
                     duration = it.duration.toMillis()
                 )
             )
-        }.then(routes(exceptionCatchingHandler))
+        }.then(exceptionCatchingHandler)
 
     val tracingHandler: RoutingHttpHandler = ServerFilters.RequestTracing()
         .then(eventsHandler)
@@ -52,14 +49,14 @@ class HttpHandler {
         val spec = "/execute" meta {
             summary = "Executes code request"
             receiving(
-                executeRequestLens to CodeRequest(
+                lenses.executeRequestLens to CodeRequest(
                     base64Code = "cHJpbnQoImhlbGxvLCB3b3JsZCEiKQ==",
                     language = "python"
                 )
             )
             returning(
                 Status.OK,
-                executeResponseLens to CodeResponse(
+                lenses.executeResponseLens to CodeResponse(
                     stdout = "hello,world!",
                     stdErr = "",
                     exitCode = 0
@@ -68,10 +65,10 @@ class HttpHandler {
         } bindContract Method.POST
 
         fun execute() = { request: Request ->
-            val codeRequest = executeRequestLens.extract(request)
+            val codeRequest = lenses.executeRequestLens.extract(request)
             when (val executeRequestResult = runnerManager.execute(codeRequest)) {
                 is ExecuteRequestResult.Success ->
-                    executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))
+                    lenses.executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))
                 is ExecuteRequestResult.Failure ->
                     errorHandler.handleExecuteRequestError(executeRequestResult)
             }

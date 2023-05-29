@@ -1,4 +1,4 @@
-package pl.edu.prz.kod.runner.domain
+package pl.edu.prz.kod.common
 
 import org.http4k.core.Status
 

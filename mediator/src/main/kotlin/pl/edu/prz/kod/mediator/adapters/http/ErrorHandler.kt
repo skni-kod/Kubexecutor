@@ -21,8 +21,11 @@ class ErrorHandler {
             is ExecuteRequestResult.Failure.ErrorReplyFromRunner ->
                 errorResponseLens.inject(
                     requestResult.errorResponse,
-                    Response(Status(requestResult.statusCode, requestResult.statusDescription))
+                    Response(requestResult.statusCode)
                 )
+
+            is ExecuteRequestResult.Failure.ExecutionTimeout ->
+                errorResponseLens.inject(ErrorResponse(requestResult.message), Response(Status.REQUEST_TIMEOUT))
         }
     }
 
