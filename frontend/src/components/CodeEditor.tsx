@@ -33,8 +33,15 @@ const CodeEditor = () => {
         .then(data => {
             console.log(data);
             setOutput(data);
-        }
-        );
+      });
+  };
+
+  const signIn = async () => {
+    const response = await fetch("http://localhost:3000/api/oauth");
+
+    const data = await response.json();
+
+    window.location.href = data.url;
     };
 
     const convertToBase64 = (str: string) => {
@@ -66,6 +73,12 @@ const CodeEditor = () => {
             <div className="flex items-center justify-center space-x-4 p-4">
                 <button
                     className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          onClick={signIn}
+        >
+          Sign In
+        </button>
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
                     onClick={getValue}
                 >
                     Submit
