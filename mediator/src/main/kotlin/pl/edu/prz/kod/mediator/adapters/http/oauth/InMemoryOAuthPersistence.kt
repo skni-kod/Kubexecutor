@@ -1,5 +1,6 @@
 package pl.edu.prz.kod.mediator.adapters.http.oauth
 
+import com.auth0.jwt.JWT
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.FORBIDDEN
@@ -15,16 +16,18 @@ import org.http4k.security.OAuthPersistence
 import org.http4k.security.openid.IdToken
 import java.time.Clock
 import java.time.Duration
-import java.util.UUID
+import java.time.Instant
 
 /**
  * This persistence handles both Bearer-token (API) and cookie-swapped access token (standard OAuth-web) flows.
  */
-class InMemoryOAuthPersistence(private val clock: Clock, private val tokenChecker: TokenChecker) : OAuthPersistence {
+class InMemoryOAuthPersistence(private val clock: Clock) : OAuthPersistence {
     private val csrfName = "securityServerCsrf"
     private val originalUriName = "securityServerUri"
     private val clientAuthCookie = "securityServerAuth"
-    private val cookieSwappableTokens = mutableMapOf<String, AccessToken>()
+    private val jwtTokens = mutableSetOf<AccessToken>()
+
+    private val jwts = Auth0Jwt("secret")
 
     override fun retrieveCsrf(request: Request) = request.cookie(csrfName)?.value?.let(::CrossSiteRequestForgeryToken)
 
@@ -33,22 +36,32 @@ class InMemoryOAuthPersistence(private val clock: Clock, private val tokenChecke
 
     override fun retrieveToken(request: Request) = (tryBearerToken(request)
         ?: tryCookieToken(request))
-        ?.takeIf(tokenChecker::check)
+        ?.takeIf(jwts::verify)
 
-    override fun assignCsrf(redirect: Response, csrf: CrossSiteRequestForgeryToken) = redirect.cookie(expiring(csrfName, csrf.value))
+    override fun assignCsrf(redirect: Response, csrf: CrossSiteRequestForgeryToken) =
+        redirect.cookie(expiring(csrfName, csrf.value))
 
     override fun assignNonce(redirect: Response, nonce: Nonce): Response = redirect
 
-    override fun assignOriginalUri(redirect: Response, originalUri: Uri): Response = redirect.cookie(expiring(originalUriName, originalUri.toString()))
+    override fun assignOriginalUri(redirect: Response, originalUri: Uri): Response =
+        redirect.cookie(expiring(originalUriName, originalUri.toString()))
 
     override fun assignToken(request: Request, redirect: Response, accessToken: AccessToken, idToken: IdToken?) =
-        UUID.randomUUID().let {
-            cookieSwappableTokens[it.toString()] = AccessToken(idToken!!.value)
-            redirect
-                .cookie(expiring(clientAuthCookie, it.toString()))
-                .invalidateCookie(csrfName)
-                .invalidateCookie(originalUriName)
-        }
+        JWT.decode(idToken!!.value)
+            .let {
+                val claims = it.claims
+                jwts.create(
+                    subject = it.subject,
+                    email = claims["email"]?.asString() ?: "NONE",
+                    expiresAt = claims["exp"]?.asLong() ?: Instant.MIN.epochSecond
+                )
+            }.let {
+                jwtTokens.add(it!!)
+                redirect
+                    .cookie(expiring(clientAuthCookie, it.value))
+                    .invalidateCookie(csrfName)
+                    .invalidateCookie(originalUriName)
+            }
 
     override fun authFailureResponse(reason: OAuthCallbackError) = Response(FORBIDDEN)
         .invalidateCookie(csrfName)
@@ -56,13 +69,16 @@ class InMemoryOAuthPersistence(private val clock: Clock, private val tokenChecke
         .invalidateCookie(clientAuthCookie)
 
     private fun tryCookieToken(request: Request) =
-        request.cookie(clientAuthCookie)?.value?.let { cookieSwappableTokens[it] }
+        request.cookie(clientAuthCookie)?.value
+            ?.let { AccessToken(it) }
 
     private fun tryBearerToken(request: Request) = request.header("Authorization")
         ?.removePrefix("Bearer ")
         ?.let { AccessToken(it) }
 
-    private fun expiring(name: String, value: String) = Cookie(name, value,
+    private fun expiring(name: String, value: String) = Cookie(
+        name, value,
         path = "/",
-        expires = clock.instant().plus(Duration.ofDays(1)))
+        expires = clock.instant().plus(Duration.ofDays(1))
+    )
 }

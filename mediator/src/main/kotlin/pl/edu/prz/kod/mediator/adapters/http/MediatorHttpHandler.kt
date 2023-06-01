@@ -19,7 +19,6 @@ import org.http4k.security.google
 import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
-import pl.edu.prz.kod.mediator.adapters.http.oauth.GoogleTokenChecker
 import pl.edu.prz.kod.mediator.adapters.http.oauth.InMemoryOAuthPersistence
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
@@ -34,7 +33,7 @@ class MediatorHttpHandler(
     val googleClientId = "CLIENT_ID"
     val googleClientSecret = "CLIENT_SECRET"
 
-    val oAuthPersistence = InMemoryOAuthPersistence(Clock.systemUTC(), GoogleTokenChecker(googleClientId))
+    val oAuthPersistence = InMemoryOAuthPersistence(Clock.systemUTC())
 
     val oauthProvider = OAuthProvider.google(
         httpHandler,
