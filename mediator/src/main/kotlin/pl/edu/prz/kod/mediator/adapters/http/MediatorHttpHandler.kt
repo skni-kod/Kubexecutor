@@ -15,40 +15,24 @@ import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.security.OAuthProvider
-import org.http4k.security.google
 import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
-import pl.edu.prz.kod.mediator.adapters.http.oauth.InMemoryOAuthPersistence
 import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
-import java.time.Clock
 
 class MediatorHttpHandler(
     private val errorHandler: ErrorHandler,
     private val runnerManager: RunnerManagerPort,
     private val lenses: Lenses,
-    private val httpHandler: HttpHandler
+    private val oAuthProvider: OAuthProvider,
 ) {
-    val googleClientId = "CLIENT_ID"
-    val googleClientSecret = "CLIENT_SECRET"
-
-    val oAuthPersistence = InMemoryOAuthPersistence(Clock.systemUTC())
-
-    val oauthProvider = OAuthProvider.google(
-        httpHandler,
-        Credentials(googleClientId, googleClientSecret),
-        Uri.of("http://localhost:8081/oauth/callback"),
-        oAuthPersistence,
-        listOf("email", "profile")
-    )
-
     private val routesContract = routes(
-        "/oauth/callback" bind Method.GET to oauthProvider.callback,
+        "/oauth/callback" bind Method.GET to oAuthProvider.callback,
         contract {
             renderer = OpenApi2(ApiInfo("Kubexecutor Mediator API", "v1.0"), Jackson)
             descriptionPath = "/openapi.json"
-            security = AuthCodeOAuthSecurity(oauthProvider)
+            security = AuthCodeOAuthSecurity(oAuthProvider)
             routes += executeRoute()
             routes += authorizeRoute()
         }

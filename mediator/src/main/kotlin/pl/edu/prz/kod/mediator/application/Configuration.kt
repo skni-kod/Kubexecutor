@@ -10,5 +10,9 @@ data class Configuration(
         "PATH_FORMAT",
         "http://%s.runner-svc.app.svc.cluster.local:8080"
     ),
-    val runnerStatusQueryPeriod: Long = EnvironmentVariable.getLongValue("STATUS_QUERY_PERIOD", 2000)
+    val runnerStatusQueryPeriod: Long = EnvironmentVariable.getLongValue("STATUS_QUERY_PERIOD", 2000),
+    val domain: String = EnvironmentVariable.getStringValue("HTTP_DOMAIN"),
+    val oAuthClientId: String = EnvironmentVariable.getStringValue("OAUTH_CLIENT_ID"),
+    val oAuthClientSecret: String = EnvironmentVariable.getStringValue("OAUTH_CLIENT_SECRET"),
+    val jwtSecret: String = EnvironmentVariable.getStringValue("JWT_SECRET")
 )
