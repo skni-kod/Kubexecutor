@@ -36,6 +36,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          env:
+            - name: HTTP_PORT
+              value: 8080
+            - name: SYSTEM_COMMAND_TIMEOUT
+              value: 5000
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
