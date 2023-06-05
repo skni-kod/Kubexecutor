@@ -22,15 +22,15 @@ spec:
             - containerPort: 8081
           env:
             - name: HTTP_PORT
-              value: 8081
+              value: "8081"
             - name: RUNNER_POD_NAME
               value: runner
             - name: RUNNER_INSTANCES
-              value: 10
+              value: "10"
             - name: PATH_FORMAT
               value: "http://%s.runner-svc.app.svc.cluster.local:8080"
             - name: STATUS_QUERY_PERIOD
-              value: 2000
+              value: "2000"
             - name: HTTP_DOMAIN
               value: "https://kube.skni.edu.pl"
           envFrom:
