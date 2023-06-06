@@ -8,9 +8,11 @@ import org.http4k.contract.openapi.ApiInfo
 import org.http4k.contract.openapi.v2.OpenApi2
 import org.http4k.contract.security.AuthCodeOAuthSecurity
 import org.http4k.core.*
+import org.http4k.filter.CorsPolicy
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.format.Jackson
+import org.http4k.lens.Header
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
@@ -26,6 +28,7 @@ class MediatorHttpHandler(
     private val runnerManager: RunnerManagerPort,
     private val lenses: Lenses,
     private val oAuthProvider: OAuthProvider,
+    private val frontendUrl: String
 ) {
     private val routesContract = routes(
         "/oauth/callback" bind Method.GET to oAuthProvider.callback,
@@ -54,12 +57,15 @@ class MediatorHttpHandler(
         }.then(exceptionCatchingHandler)
 
     val tracingHandler: RoutingHttpHandler = ServerFilters.RequestTracing()
+        .then(ServerFilters.Cors(CorsPolicy.UnsafeGlobalPermissive))
         .then(eventsHandler)
 
     private fun authorizeRoute(): ContractRoute {
-        val spec = "/hello" bindContract Method.GET
+        val spec = "/authorize" bindContract Method.GET
 
-        return spec to { _ -> Response(Status.OK) }
+        return spec to { _ -> Response(Status.TEMPORARY_REDIRECT)
+            .with(Header.LOCATION of Uri.of(frontendUrl))
+        }
     }
 
     private fun executeRoute(): ContractRoute {

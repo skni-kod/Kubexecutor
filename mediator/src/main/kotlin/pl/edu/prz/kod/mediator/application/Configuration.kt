@@ -11,7 +11,8 @@ data class Configuration(
         "http://%s.runner-svc.app.svc.cluster.local:8080"
     ),
     val runnerStatusQueryPeriod: Long = EnvironmentVariable.getLongValue("STATUS_QUERY_PERIOD", 2000),
-    val domain: String = EnvironmentVariable.getStringValue("HTTP_DOMAIN"),
+    val frontendHttpUrl: String = EnvironmentVariable.getStringValue("FRONTEND_HTTP_URL"),
+    val backendHttpUrl: String = EnvironmentVariable.getStringValue("BACKEND_HTTP_URL"),
     val oAuthClientId: String = EnvironmentVariable.getStringValue("OAUTH_CLIENT_ID"),
     val oAuthClientSecret: String = EnvironmentVariable.getStringValue("OAUTH_CLIENT_SECRET"),
     val jwtSecret: String = EnvironmentVariable.getStringValue("JWT_SECRET")

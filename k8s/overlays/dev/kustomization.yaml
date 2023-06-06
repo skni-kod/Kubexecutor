@@ -6,11 +6,11 @@ resources:
 
 images:
   - name: musiek/runner
-    newTag: '0.21'
+    newTag: '0.22'
   - name: musiek/mediator
-    newTag: '0.25'
+    newTag: '0.26'
   - name: musiek/frontend
-    newTag: '0.02'
+    newTag: '0.03'
 
 replicas:
   - name: runner

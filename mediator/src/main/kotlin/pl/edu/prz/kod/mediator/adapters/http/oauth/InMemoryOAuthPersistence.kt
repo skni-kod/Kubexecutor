@@ -21,7 +21,7 @@ import java.time.Instant
 /**
  * This persistence handles both Bearer-token (API) and cookie-swapped access token (standard OAuth-web) flows.
  */
-class InMemoryOAuthPersistence(private val clock: Clock) : OAuthPersistence {
+class InMemoryOAuthPersistence(private val clock: Clock, private val frontendHttpUrl: String) : OAuthPersistence {
     private val csrfName = "securityServerCsrf"
     private val originalUriName = "securityServerUri"
     private val clientAuthCookie = "securityServerAuth"
@@ -32,7 +32,7 @@ class InMemoryOAuthPersistence(private val clock: Clock) : OAuthPersistence {
     override fun retrieveCsrf(request: Request) = request.cookie(csrfName)?.value?.let(::CrossSiteRequestForgeryToken)
 
     override fun retrieveNonce(request: Request): Nonce? = null
-    override fun retrieveOriginalUri(request: Request): Uri? = request.cookie(originalUriName)?.value?.let(Uri::of)
+    override fun retrieveOriginalUri(request: Request): Uri? = Uri.of(frontendHttpUrl)
 
     override fun retrieveToken(request: Request) = (tryBearerToken(request)
         ?: tryCookieToken(request))
@@ -43,8 +43,7 @@ class InMemoryOAuthPersistence(private val clock: Clock) : OAuthPersistence {
 
     override fun assignNonce(redirect: Response, nonce: Nonce): Response = redirect
 
-    override fun assignOriginalUri(redirect: Response, originalUri: Uri): Response =
-        redirect.cookie(expiring(originalUriName, originalUri.toString()))
+    override fun assignOriginalUri(redirect: Response, originalUri: Uri): Response = redirect
 
     override fun assignToken(request: Request, redirect: Response, accessToken: AccessToken, idToken: IdToken?) =
         JWT.decode(idToken!!.value)

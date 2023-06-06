@@ -33,19 +33,31 @@ fun main() {
                 single { Configuration() }
                 single<HttpHandler> { OkHttp() }
                 singleOf(::ErrorHandler)
-                single<OAuthPersistence> { InMemoryOAuthPersistence(Clock.systemUTC()) }
+                single<OAuthPersistence> {
+                    val configuration: Configuration = get()
+                    InMemoryOAuthPersistence(Clock.systemUTC(), configuration.frontendHttpUrl)
+                }
                 single {
                     val configuration: Configuration = get()
                     OAuthProvider.google(
                         get(),
                         Credentials(configuration.oAuthClientId, configuration.oAuthClientSecret),
-                        Uri.of("${configuration.domain}${OAUTH_CALLBACK_PATH}"),
+                        Uri.of("${configuration.backendHttpUrl}${OAUTH_CALLBACK_PATH}"),
                         get(),
                         listOf("email", "profile")
                     )
                 }
                 singleOf(::RunnerManager) bind RunnerManagerPort::class
-                singleOf(::MediatorHttpHandler)
+                single {
+                    val configuration: Configuration = get()
+                    MediatorHttpHandler(
+                        get(),
+                        get(),
+                        get(),
+                        get(),
+                        configuration.frontendHttpUrl
+                        )
+                }
             }
         )
     }

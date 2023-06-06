@@ -31,7 +31,9 @@ spec:
               value: "http://%s.runner-svc.app.svc.cluster.local:8080"
             - name: STATUS_QUERY_PERIOD
               value: "2000"
-            - name: HTTP_DOMAIN
+            - name: FRONTEND_HTTP_URL
+              value: "https://kube.skni.edu.pl"
+            - name: BACKEND_HTTP_URL
               value: "https://kube.skni.edu.pl:4748"
           envFrom:
             - secretRef:
