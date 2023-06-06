@@ -1,4 +1,4 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export type ExecuteRequestBody = {
     language: string,
@@ -21,7 +21,12 @@ export async function POST(request: NextRequest) {
         })
     })
 
-    const response = await res.json();
-
-    return NextResponse.json(response);
+    if (res.redirected) {
+        return NextResponse.json(
+            { status: "Unauthorized" },
+            { status: 401 })
+    } else if (res.status == 200) {
+        const response = await res.json();
+        return NextResponse.json(response);
+    }
 }

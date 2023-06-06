@@ -1,21 +1,21 @@
 'use client';
 
-import React, {useRef, useState} from "react";
-import Editor, {Monaco} from "@monaco-editor/react";
-import type {editor as EditorType} from "monaco-editor";
-import {ChevronDownIcon} from "@heroicons/react/20/solid";
+import React, { useRef, useState } from "react";
+import Editor, { Monaco } from "@monaco-editor/react";
+import type { editor as EditorType } from "monaco-editor";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 
 const options = [
-    {value: "nodejs", label: "JavaScript"},
-    {value: "java", label: "Java"},
-    {value: "python", label: "Python"},
+    { value: "nodejs", label: "JavaScript" },
+    { value: "java", label: "Java" },
+    { value: "python", label: "Python" },
 ]
 
 export type CodeEditorProps = {
     authToken: string | null
-  }
-  
+}
+
 const CodeEditor = ({ authToken }: CodeEditorProps) => {
     const editorRef = useRef<EditorType.IStandaloneCodeEditor | null>(null);
     const [language, setLanguage] = useState("nodejs");
@@ -23,24 +23,30 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
     const [output, setOutput] = useState<{ stdout: string; stdErr: string; exitCode: number } | null>(null);
 
     const endpoint = "/api/execute"
-    const getValue = () => {
+    const getValue = async () => {
         const base64Code = convertToBase64(editorRef.current?.getValue() || '');
-        fetch(endpoint, {
+        let response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                    language: language,
-                    base64Code: base64Code,
-                    authToken: authToken
-                }
+                language: language,
+                base64Code: base64Code,
+                authToken: authToken
+            }
             )
-        }).then(response => response.json())
-            .then(data => {
-                console.log(data);
-                setOutput(data);
-            });
+        })
+        if (response.status == 401) {
+            console.log('redirect')
+            signIn()
+        } else if (response.status == 200) {
+            response.json()
+                .then(data => {
+                    console.log(data);
+                    setOutput(data);
+                });
+        }
     };
 
     const signIn = async () => {
@@ -78,14 +84,8 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
         <div className="flex flex-col h-screen">
             <div className="flex items-center justify-center space-x-4 p-4">
                 <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                    onClick={signIn}
-                >
-                    Sign In
-                </button>
-                <button
-                    className={clsx("text-white font-bold py-2 px-4 rounded", authToken ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500")}
-                    onClick={authToken ? getValue : () => {}}
+                    className="text-white font-bold py-2 px-4 rounded bg-blue-500 hover:bg-blue-600"
+                    onClick={getValue}
                 >
                     Submit
                 </button>
@@ -101,7 +101,7 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
                         ))}
                     </select>
                     <ChevronDownIcon
-                        className="absolute top-1/2 right-2 transform -translate-y-1/2 w-5 h-5 text-white pointer-events-none"/>
+                        className="absolute top-1/2 right-2 transform -translate-y-1/2 w-5 h-5 text-white pointer-events-none" />
                 </div>
             </div>
             <Editor
