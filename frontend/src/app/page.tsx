@@ -3,11 +3,11 @@ import { cookies } from 'next/headers';
 
 
 export default function Home() {
-  const tokenValue = cookies().get("securityServerAuth");
-
+  const tokenCookie = cookies().get("securityServerAuth");
+  const tokenValue = tokenCookie?.value ? tokenCookie.value.substring(1,tokenCookie.value.length-1) : null
   return (
     <div>
-      <CodeEditor authToken={tokenValue?.value ? tokenValue.value.substring(1,tokenValue.value.length-1) : "NO_TOKEN"}/>
+      <CodeEditor authToken={tokenValue}/>
     </div>
   )
 }

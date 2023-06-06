@@ -4,6 +4,7 @@ import React, {useRef, useState} from "react";
 import Editor, {Monaco} from "@monaco-editor/react";
 import type {editor as EditorType} from "monaco-editor";
 import {ChevronDownIcon} from "@heroicons/react/20/solid";
+import clsx from "clsx";
 
 const options = [
     {value: "nodejs", label: "JavaScript"},
@@ -12,7 +13,7 @@ const options = [
 ]
 
 export type CodeEditorProps = {
-    authToken: string
+    authToken: string | null
   }
   
 const CodeEditor = ({ authToken }: CodeEditorProps) => {
@@ -83,8 +84,8 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
                     Sign In
                 </button>
                 <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                    onClick={getValue}
+                    className={clsx("text-white font-bold py-2 px-4 rounded", authToken ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500")}
+                    onClick={authToken ? getValue : () => {}}
                 >
                     Submit
                 </button>
