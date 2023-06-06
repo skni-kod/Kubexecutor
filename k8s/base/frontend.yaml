@@ -24,7 +24,7 @@ spec:
             - name: EXECUTE_ENDPOINT
               value: http://kube.skni.edu.pl:4748/execute
             - name: AUTHORIZE_ENDPOINT
-              value: http://kube.skni.edu.pl:4748/authorize
+              value: http://kube.skni.edu.pl:4748/authenticate
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

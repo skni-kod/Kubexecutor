@@ -21,25 +21,28 @@ import java.time.Instant
 /**
  * This persistence handles both Bearer-token (API) and cookie-swapped access token (standard OAuth-web) flows.
  */
-class InMemoryOAuthPersistence(private val clock: Clock, private val frontendHttpUrl: String) : OAuthPersistence {
+class InMemoryOAuthPersistence(
+    private val clock: Clock,
+    private val frontendHttpUrl: String,
+    jwtSecret: String
+) : OAuthPersistence {
     private val csrfName = "securityServerCsrf"
     private val originalUriName = "securityServerUri"
     private val clientAuthCookie = "securityServerAuth"
     private val jwtTokens = mutableSetOf<AccessToken>()
 
-    private val jwts = Auth0Jwt("secret")
+    private val jwts = Auth0Jwt(jwtSecret)
 
     override fun retrieveCsrf(request: Request) = request.cookie(csrfName)?.value?.let(::CrossSiteRequestForgeryToken)
 
     override fun retrieveNonce(request: Request): Nonce? = null
     override fun retrieveOriginalUri(request: Request): Uri? = Uri.of(frontendHttpUrl)
 
-    override fun retrieveToken(request: Request) = (tryBearerToken(request)
-        ?: tryCookieToken(request))
+    override fun retrieveToken(request: Request) = tryBearerToken(request)
         ?.takeIf(jwts::verify)
 
     override fun assignCsrf(redirect: Response, csrf: CrossSiteRequestForgeryToken) =
-        redirect.cookie(expiring(csrfName, csrf.value))
+        redirect.cookie(expiring(csrfName, csrf.value).httpOnly())
 
     override fun assignNonce(redirect: Response, nonce: Nonce): Response = redirect
 
@@ -57,19 +60,14 @@ class InMemoryOAuthPersistence(private val clock: Clock, private val frontendHtt
             }.let {
                 jwtTokens.add(it!!)
                 redirect
-                    .cookie(expiring(clientAuthCookie, it.value))
+                    .cookie(expiring(clientAuthCookie, it.value).httpOnly())
                     .invalidateCookie(csrfName)
-                    .invalidateCookie(originalUriName)
             }
 
     override fun authFailureResponse(reason: OAuthCallbackError) = Response(FORBIDDEN)
         .invalidateCookie(csrfName)
         .invalidateCookie(originalUriName)
         .invalidateCookie(clientAuthCookie)
-
-    private fun tryCookieToken(request: Request) =
-        request.cookie(clientAuthCookie)?.value
-            ?.let { AccessToken(it) }
 
     private fun tryBearerToken(request: Request) = request.header("Authorization")
         ?.removePrefix("Bearer ")

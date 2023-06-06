@@ -61,7 +61,7 @@ class MediatorHttpHandler(
         .then(eventsHandler)
 
     private fun authorizeRoute(): ContractRoute {
-        val spec = "/authorize" bindContract Method.GET
+        val spec = "/authenticate" bindContract Method.GET
 
         return spec to { _ -> Response(Status.TEMPORARY_REDIRECT)
             .with(Header.LOCATION of Uri.of(frontendUrl))

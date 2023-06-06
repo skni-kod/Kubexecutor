@@ -35,7 +35,7 @@ fun main() {
                 singleOf(::ErrorHandler)
                 single<OAuthPersistence> {
                     val configuration: Configuration = get()
-                    InMemoryOAuthPersistence(Clock.systemUTC(), configuration.frontendHttpUrl)
+                    InMemoryOAuthPersistence(Clock.systemUTC(), configuration.frontendHttpUrl, configuration.jwtSecret)
                 }
                 single {
                     val configuration: Configuration = get()
@@ -56,7 +56,7 @@ fun main() {
                         get(),
                         get(),
                         configuration.frontendHttpUrl
-                        )
+                    )
                 }
             }
         )
