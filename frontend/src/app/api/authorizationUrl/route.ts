@@ -1,9 +1,6 @@
-import {NextResponse} from "next/server";
-
 export const GET = async () => {
   let endpoint = process.env.AUTHORIZE_ENDPOINT || "";
-  console.log(endpoint);
-  return new NextResponse(
+  return new Response(
     JSON.stringify({
       url: endpoint
     })
