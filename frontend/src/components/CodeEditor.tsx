@@ -49,7 +49,7 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
     };
 
     const signIn = async () => {
-        const endpoint = "/api/authorizationUrl"
+        const endpoint = "/api/authenticationUrl"
         fetch(endpoint, {
             method: 'GET'
         }).then(response => response.json())
