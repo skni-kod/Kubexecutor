@@ -8,7 +8,7 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.Http4kUndertowHttpHandler
 import org.http4k.server.ServerConfig
 import pl.edu.prz.kod.common.EXECUTE_PATH
-import pl.edu.prz.kod.common.STATUSES_REQUIRING_RESTART
+import pl.edu.prz.kod.runner.STATUSES_REQUIRING_RESTART
 import java.net.InetSocketAddress
 import kotlin.system.exitProcess
 

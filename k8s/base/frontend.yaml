@@ -22,7 +22,9 @@ spec:
             - containerPort: 3000
           env:
             - name: EXECUTE_ENDPOINT
-              value: http://mediator.app.svc.cluster.local:8081/execute
+              value: http://kube.skni.edu.pl:4748/execute
+            - name: AUTHORIZE_ENDPOINT
+              value: http://kube.skni.edu.pl:4748/authenticate
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

@@ -21,8 +21,23 @@ spec:
           ports:
             - containerPort: 8081
           env:
+            - name: HTTP_PORT
+              value: "8081"
+            - name: RUNNER_POD_NAME
+              value: runner
             - name: RUNNER_INSTANCES
               value: "10"
+            - name: PATH_FORMAT
+              value: "http://%s.runner-svc.app.svc.cluster.local:8080"
+            - name: STATUS_QUERY_PERIOD
+              value: "2000"
+            - name: FRONTEND_HTTP_URL
+              value: "https://kube.skni.edu.pl"
+            - name: BACKEND_HTTP_URL
+              value: "https://kube.skni.edu.pl:4748"
+          envFrom:
+            - secretRef:
+                name: mediator-secret
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -42,6 +57,22 @@ spec:
   ports:
     - protocol: TCP
       port: 8081
+      targetPort: 8081
+  selector:
+    app: mediator
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mediator-lb
+  namespace: app
+  labels:
+    app: mediator
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 4748
       targetPort: 8081
   selector:
     app: mediator

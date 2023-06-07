@@ -1,5 +1,7 @@
 package pl.edu.prz.kod.common.application
 
+import pl.edu.prz.kod.common.exception.EnvironmentVariableNotSetException
+
 class EnvironmentVariable {
     companion object {
         @JvmStatic
@@ -13,5 +15,9 @@ class EnvironmentVariable {
         @JvmStatic
         fun getStringValue(name: String, defaultValue: String): String =
             System.getenv(name) ?: defaultValue
+
+        @JvmStatic
+        fun getStringValue(name: String): String =
+            System.getenv(name) ?: throw EnvironmentVariableNotSetException(name)
     }
 }

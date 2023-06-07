@@ -2,6 +2,8 @@ val logbackVersion: String by project
 val koinVersion: String by project
 val jacksonVersion: String by project
 val http4kVersion: String by project
+val googleApiClientVersion: String by project
+val javaJwtVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -37,11 +39,14 @@ dependencies {
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("org.http4k:http4k-bom:$http4kVersion")
     implementation("org.http4k:http4k-core:$http4kVersion")
+    implementation("org.http4k:http4k-security-oauth:$http4kVersion")
     implementation("org.http4k:http4k-server-netty:$http4kVersion")
     implementation("org.http4k:http4k-format-jackson:$http4kVersion")
     implementation("org.http4k:http4k-format-core:$http4kVersion")
     implementation("org.http4k:http4k-contract:$http4kVersion")
     implementation("org.http4k:http4k-client-okhttp:$http4kVersion")
+    implementation("com.google.api-client:google-api-client:$googleApiClientVersion")
+    implementation("com.auth0:java-jwt:$javaJwtVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("ch.qos.logback.contrib:logback-json-classic:0.1.5")
     implementation("ch.qos.logback.contrib:logback-jackson:0.1.5")
