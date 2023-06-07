@@ -4,6 +4,8 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTCreationException
 import com.auth0.jwt.exceptions.JWTVerificationException
 import org.http4k.security.AccessToken
+import pl.edu.prz.kod.mediator.adapters.http.TokenVerifiedEvent
+import pl.edu.prz.kod.mediator.adapters.http.logEvent
 import java.time.Instant
 import java.util.*
 
@@ -32,7 +34,8 @@ class Auth0Jwt(private val secret: String) : Jwt {
 
     override fun verify(token: AccessToken): Boolean {
         try {
-            verifier.verify(token.value)
+            val decoded = verifier.verify(token.value)
+            logEvent(TokenVerifiedEvent(decoded.claims["email"]?.asString() ?: "NONE"))
             return true
         } catch (e: JWTVerificationException) {
             return false

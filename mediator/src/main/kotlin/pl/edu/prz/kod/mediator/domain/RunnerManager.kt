@@ -9,6 +9,7 @@ import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.STATUS_PATH
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.domain.RunnerStatus
+import pl.edu.prz.kod.mediator.adapters.http.ExceptionEvent
 import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
 import pl.edu.prz.kod.mediator.adapters.http.RunnerReadyEvent
 import pl.edu.prz.kod.mediator.adapters.http.logEvent
@@ -74,13 +75,17 @@ class RunnerManager(
 
 
     private fun updateRunnersState() {
-        runnersState
-            .filterValues { it == RunnerStatus.RESTARTING }
-            .filter { isRunnerReady(it.key) }
-            .forEach {
-                runnersState[it.key] = RunnerStatus.READY
-                logEvent(RunnerReadyEvent(it.key))
-            }
+        try {
+            runnersState
+                .filterValues { it == RunnerStatus.RESTARTING }
+                .filter { isRunnerReady(it.key) }
+                .forEach {
+                    runnersState[it.key] = RunnerStatus.READY
+                    logEvent(RunnerReadyEvent(it.key))
+                }
+        } catch (e: Exception) {
+            logEvent(ExceptionEvent(e))
+        }
     }
 
     private fun isRunnerReady(runner: String): Boolean {
