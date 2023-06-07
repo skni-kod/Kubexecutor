@@ -15,7 +15,6 @@
     "@types/react": "18.2.5",
     "@types/react-dom": "18.2.3",
     "autoprefixer": "10.4.14",
-    "clsx": "^1.2.1",
     "eslint": "8.39.0",
     "eslint-config-next": "13.4.0",
     "monaco-editor": "^0.38.0",

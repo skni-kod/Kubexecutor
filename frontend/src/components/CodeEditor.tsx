@@ -4,7 +4,6 @@ import React, { useRef, useState } from "react";
 import Editor, { Monaco } from "@monaco-editor/react";
 import type { editor as EditorType } from "monaco-editor";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import clsx from "clsx";
 
 const options = [
     { value: "nodejs", label: "JavaScript" },
