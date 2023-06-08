@@ -1,13 +1,16 @@
 # Kubexecutor
-To build:
-```shell
-./gradlew jar
-```
 
-To build container image:
-```shell
- docker build -t kubexecutor:$(git rev-parse --short HEAD) -t kubexecutor:latest .
-```
+A code execution sandbox running natively on Kubernetes. Written in Kotlin. 
+The project leverages the power of Kubernetes orchestration and the security capabilities
+of Kata containers to create a ~~robust and secure~~(one day) environment for executing untrusted code.
+
+The project uses Kata containers as a runtime environment, which provide lightweight, secure and isolated containerized
+virtual machines that offer an additional layer of protection compared to traditional container runtimes.
+
+[Try it out here.](https://kube.skni.edu.pl/)
+
+## Building images
+To build service images, use defined Github Actions.
 
 ## Setting up dev cluster with k3s and Kata Containers
 We'll be using kata-containers stable-3.1.
@@ -38,12 +41,19 @@ Source:
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
+## Accessing PostgreSQL
+
+```shell
+kubectl port-forward svc/postgresdb -n postgres 5432:5432
+```
+Then log into database using any database client and secrets available on the cluster (namespace `postgres`).
+
 ## Deploying my version of Kubexecutor on dev env
 
 In order to run my version of Kubexecutor on dev cluster:
 1. Create a feature branch with desired changes.
 2. Modify image tag version in `k8s/overlays/dev/kustomization.yaml`
-3. Run Build & push Github workflow with version specified in the step above.
+3. Run Build & push Github Actions workflow of the modified service.
 4. Connect to ArgoCD, enter kubexecutor app -> app details -> edit.
 5. Change *Target Revision* to name of Your feature branch, i.e. `feature/test-deploy-from-branch`.
 6. Sync the state of the application in ArgoCD.

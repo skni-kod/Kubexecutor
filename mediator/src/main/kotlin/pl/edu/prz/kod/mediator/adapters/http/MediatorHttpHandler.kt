@@ -20,7 +20,9 @@ import org.http4k.security.OAuthProvider
 import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
-import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
+import pl.edu.prz.kod.mediator.application.Configuration
+import pl.edu.prz.kod.mediator.domain.ExecutionContext
+import pl.edu.prz.kod.mediator.domain.result.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 
 class MediatorHttpHandler(
@@ -28,8 +30,10 @@ class MediatorHttpHandler(
     private val runnerManager: RunnerManagerPort,
     private val lenses: Lenses,
     private val oAuthProvider: OAuthProvider,
-    private val frontendUrl: String
+    private val contexts: RequestContexts,
+    private val configuration: Configuration
 ) {
+
     private val routesContract = routes(
         "/oauth/callback" bind Method.GET to oAuthProvider.callback,
         contract {
@@ -56,7 +60,8 @@ class MediatorHttpHandler(
             )
         }.then(exceptionCatchingHandler)
 
-    val tracingHandler: RoutingHttpHandler = ServerFilters.RequestTracing()
+    val tracingHandler: RoutingHttpHandler = ServerFilters.InitialiseRequestContext(contexts)
+        .then(ServerFilters.RequestTracing())
         .then(ServerFilters.Cors(CorsPolicy.UnsafeGlobalPermissive))
         .then(eventsHandler)
 
@@ -64,7 +69,7 @@ class MediatorHttpHandler(
         val spec = "/authenticate" bindContract Method.GET
 
         return spec to { _ -> Response(Status.TEMPORARY_REDIRECT)
-            .with(Header.LOCATION of Uri.of(frontendUrl))
+            .with(Header.LOCATION of Uri.of(configuration.frontendHttpUrl))
         }
     }
 
@@ -80,7 +85,7 @@ class MediatorHttpHandler(
             returning(
                 Status.OK,
                 lenses.executeResponseLens to CodeResponse(
-                    stdout = "hello,world!",
+                    stdOut = "hello,world!",
                     stdErr = "",
                     exitCode = 0
                 )
@@ -89,7 +94,8 @@ class MediatorHttpHandler(
 
         fun execute() = { request: Request ->
             val codeRequest = lenses.executeRequestLens.extract(request)
-            when (val executeRequestResult = runnerManager.execute(codeRequest)) {
+            val context = ExecutionContext(contexts[request]["email"]!!)
+            when (val executeRequestResult = runnerManager.execute(codeRequest, context)) {
                 is ExecuteRequestResult.Success ->
                     lenses.executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))
                 is ExecuteRequestResult.Failure ->

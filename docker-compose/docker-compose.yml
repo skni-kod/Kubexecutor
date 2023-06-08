@@ -1,24 +1,36 @@
 services:
   kubexecutor-frontend:
-    image: kubexecutor-frontend:latest
+    image: musiek/frontend:0.05
     ports:
       - "3000:3000"
     networks:
       - kubexecutor-network
     environment:
       - EXECUTE_ENDPOINT=http://kubexecutor-mediator:8081/execute
+      - AUTHENTICATE_ENDPOINT=http://localhost:8081/authenticate # localhost required for redirection
   kubexecutor-mediator:
-    image: kubexecutor-mediator:latest
-#    ports:
-#      - "8081:8081"
+    image: musiek/mediator:0.28
+    ports:
+      - "8081:8081"
     networks:
       - kubexecutor-network
     environment:
       - RUNNER_POD_NAME=kubexecutor-runner
       - PATH_FORMAT=http://%s:8080
       - RUNNER_INSTANCES=2
+      - FRONTEND_HTTP_URL=http://localhost:3000 # localhost required for redirection
+      - BACKEND_HTTP_URL=http://localhost:8081 # localhost required for redirection
+      - JDBC_URL=jdbc:postgresql://postgres:5432/mediator
+      - OAUTH_CLIENT_ID=client_id # You can get it from our K8s secrets or generate your own
+      - OAUTH_CLIENT_SECRET=client_secret # You can get it from our K8s secrets or generate your own
+      - JWT_SECRET=jwt_secrets
+      - DATABASE=mediator
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+    depends_on:
+      - postgres
   kubexecutor-runner-0:
-    image: kubexecutor-runner:latest
+    image: musiek/runner:0.24
 #    ports:
 #      - "8080:8080"
     restart: unless-stopped
@@ -27,7 +39,7 @@ services:
     environment:
       - SYSTEM_COMMAND_TIMEOUT=20000
   kubexecutor-runner-1:
-    image: kubexecutor-runner:latest
+    image: musiek/runner:latest
 #    ports:
 #      - "8080:8080"
     restart: unless-stopped
@@ -35,5 +47,15 @@ services:
       - kubexecutor-network
     environment:
       - SYSTEM_COMMAND_TIMEOUT=20000
+  postgres:
+    image: "postgres:15.2"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=mediator
+    ports:
+      - "5432:5432"
+    networks:
+      - kubexecutor-network
 networks:
   kubexecutor-network: {}

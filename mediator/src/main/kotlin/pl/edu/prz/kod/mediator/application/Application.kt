@@ -1,15 +1,14 @@
 package pl.edu.prz.kod.mediator.application
 
 import org.http4k.client.OkHttp
-import org.http4k.core.Credentials
-import org.http4k.core.HttpHandler
-import org.http4k.core.Uri
+import org.http4k.core.*
 import org.http4k.security.OAuthPersistence
 import org.http4k.security.OAuthProvider
 import org.http4k.security.google
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.createdAtStart
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -21,7 +20,10 @@ import pl.edu.prz.kod.mediator.adapters.http.ErrorHandler
 import pl.edu.prz.kod.mediator.adapters.http.MediatorHttpHandler
 import pl.edu.prz.kod.mediator.adapters.http.logEvent
 import pl.edu.prz.kod.mediator.adapters.http.oauth.InMemoryOAuthPersistence
+import pl.edu.prz.kod.mediator.db.DatabaseFactory
+import pl.edu.prz.kod.mediator.db.LogRepository
 import pl.edu.prz.kod.mediator.domain.RunnerManager
+import pl.edu.prz.kod.mediator.ports.LogRepositoryPort
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 import java.time.Clock
 
@@ -33,9 +35,15 @@ fun main() {
                 single { Configuration() }
                 single<HttpHandler> { OkHttp() }
                 singleOf(::ErrorHandler)
+                single { RequestContexts() }
                 single<OAuthPersistence> {
                     val configuration: Configuration = get()
-                    InMemoryOAuthPersistence(Clock.systemUTC(), configuration.frontendHttpUrl, configuration.jwtSecret)
+                    InMemoryOAuthPersistence(
+                        Clock.systemUTC(),
+                        configuration.frontendHttpUrl,
+                        get(),
+                        configuration.jwtSecret
+                    )
                 }
                 single {
                     val configuration: Configuration = get()
@@ -48,16 +56,9 @@ fun main() {
                     )
                 }
                 singleOf(::RunnerManager) bind RunnerManagerPort::class
-                single {
-                    val configuration: Configuration = get()
-                    MediatorHttpHandler(
-                        get(),
-                        get(),
-                        get(),
-                        get(),
-                        configuration.frontendHttpUrl
-                    )
-                }
+                singleOf(::MediatorHttpHandler)
+                singleOf(::DatabaseFactory) { createdAtStart() }
+                singleOf(::LogRepository) bind LogRepositoryPort::class
             }
         )
     }

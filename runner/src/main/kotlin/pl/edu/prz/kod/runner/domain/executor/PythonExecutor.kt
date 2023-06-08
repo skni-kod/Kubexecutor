@@ -14,7 +14,7 @@ class PythonExecutor(
             return ExecutionResult.Failure.ProcessTimedOutError(configuration.systemCommandTimeout)
         }
         return ExecutionResult.Success(
-            stdout = process.inputStream.bufferedReader().readText(),
+            stdOut = process.inputStream.bufferedReader().readText(),
             stdErr = process.errorStream.bufferedReader().readText(),
             exitCode = process.exitValue()
         )

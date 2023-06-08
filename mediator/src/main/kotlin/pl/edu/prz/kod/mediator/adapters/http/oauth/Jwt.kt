@@ -11,7 +11,12 @@ import java.util.*
 
 interface Jwt {
     fun create(subject: String, email: String, expiresInSeconds: Long): AccessToken?
-    fun verify(token: AccessToken): Boolean
+    fun verify(token: AccessToken): TokenVerificationResult
+}
+
+sealed class TokenVerificationResult {
+    data class Success(val email: String) : TokenVerificationResult()
+    object Failure : TokenVerificationResult()
 }
 
 class Auth0Jwt(private val secret: String) : Jwt {
@@ -32,13 +37,14 @@ class Auth0Jwt(private val secret: String) : Jwt {
         }
     }
 
-    override fun verify(token: AccessToken): Boolean {
+    override fun verify(token: AccessToken): TokenVerificationResult {
         try {
             val decoded = verifier.verify(token.value)
-            logEvent(TokenVerifiedEvent(decoded.claims["email"]?.asString() ?: "NONE"))
-            return true
+            val email = decoded.claims["email"]?.asString() ?: return TokenVerificationResult.Failure
+            logEvent(TokenVerifiedEvent(email))
+            return TokenVerificationResult.Success(email)
         } catch (e: JWTVerificationException) {
-            return false
+            return TokenVerificationResult.Failure
         }
     }
 

@@ -15,5 +15,11 @@ data class Configuration(
     val backendHttpUrl: String = EnvironmentVariable.getStringValue("BACKEND_HTTP_URL"),
     val oAuthClientId: String = EnvironmentVariable.getStringValue("OAUTH_CLIENT_ID"),
     val oAuthClientSecret: String = EnvironmentVariable.getStringValue("OAUTH_CLIENT_SECRET"),
-    val jwtSecret: String = EnvironmentVariable.getStringValue("JWT_SECRET")
+    val jwtSecret: String = EnvironmentVariable.getStringValue("JWT_SECRET"),
+
+//    Database
+    val jdbcUrl: String = EnvironmentVariable.getStringValue("JDBC_URL"),
+    val database: String = EnvironmentVariable.getStringValue("DATABASE"),
+    val databaseUser: String = EnvironmentVariable.getStringValue("DB_USER"),
+    val databasePassword: String = EnvironmentVariable.getStringValue("DB_PASSWORD")
 )

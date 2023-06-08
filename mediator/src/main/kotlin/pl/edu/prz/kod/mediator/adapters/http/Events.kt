@@ -20,4 +20,6 @@ data class TokenAssignedEvent(val email: String) : Event
 data class TokenVerifiedEvent(val email: String) : Event
 data class ExecutionFailedEvent(val message: String) : Event
 data class ExceptionEvent(val exception: Throwable) : Event
+data class LogInsertedEvent(val email: String) : Event
+data class FailedToInsertLogEvent(val email: String) : Event
 data class ApplicationStartedEvent(val port: Int, val message: String = "Application started") : Event

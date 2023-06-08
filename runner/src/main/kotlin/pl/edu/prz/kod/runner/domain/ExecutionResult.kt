@@ -1,7 +1,7 @@
 package pl.edu.prz.kod.runner.domain
 
 sealed class ExecutionResult {
-    data class Success(val stdout: String, val stdErr: String, val exitCode: Int) :
+    data class Success(val stdOut: String, val stdErr: String, val exitCode: Int) :
         ExecutionResult()
 
     sealed class Failure(val message: String) : ExecutionResult() {

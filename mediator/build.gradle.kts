@@ -4,6 +4,10 @@ val jacksonVersion: String by project
 val http4kVersion: String by project
 val googleApiClientVersion: String by project
 val javaJwtVersion: String by project
+val flywayVersion: String by project
+val postgresqlVersion: String by project
+val hikariVersion: String by project
+val exposedVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -51,6 +55,14 @@ dependencies {
     implementation("ch.qos.logback.contrib:logback-json-classic:0.1.5")
     implementation("ch.qos.logback.contrib:logback-jackson:0.1.5")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+
+//    Database
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 }
 
 tasks.getByName<Test>("test") {

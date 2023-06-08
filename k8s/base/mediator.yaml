@@ -35,6 +35,8 @@ spec:
               value: "https://kube.skni.edu.pl"
             - name: BACKEND_HTTP_URL
               value: "https://kube.skni.edu.pl:4748"
+            - name: JDBC_URL
+              value: "jdbc:postgresql://postgresdb.postgres.svc.cluster.local:5432/mediator"
           envFrom:
             - secretRef:
                 name: mediator-secret
