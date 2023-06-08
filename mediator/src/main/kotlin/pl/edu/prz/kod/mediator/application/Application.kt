@@ -56,17 +56,7 @@ fun main() {
                     )
                 }
                 singleOf(::RunnerManager) bind RunnerManagerPort::class
-                single {
-                    val configuration: Configuration = get()
-                    MediatorHttpHandler(
-                        get(),
-                        get(),
-                        get(),
-                        get(),
-                        get(),
-                        configuration.frontendHttpUrl
-                    )
-                }
+                singleOf(::MediatorHttpHandler)
                 singleOf(::DatabaseFactory) { createdAtStart() }
                 singleOf(::LogRepository) bind LogRepositoryPort::class
             }

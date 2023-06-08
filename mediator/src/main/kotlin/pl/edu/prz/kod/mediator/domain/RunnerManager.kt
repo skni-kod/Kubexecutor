@@ -13,6 +13,7 @@ import pl.edu.prz.kod.common.domain.RunnerStatus
 import pl.edu.prz.kod.mediator.adapters.http.*
 import pl.edu.prz.kod.mediator.application.Configuration
 import pl.edu.prz.kod.mediator.domain.result.ExecuteRequestResult
+import pl.edu.prz.kod.mediator.domain.result.InsertResult
 import pl.edu.prz.kod.mediator.ports.LogRepositoryPort
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 import java.util.*
@@ -102,8 +103,9 @@ class RunnerManager(
 
     private fun persistResult(context: ExecutionContext, request: CodeRequest, result: ExecuteRequestResult) {
         when (result) {
+//            TODO insert log asynchronously
             is ExecuteRequestResult.Success -> runBlocking {
-                logRepository.insertLog(
+                val result = logRepository.insertLog(
                     ExecutionLog(
                         email = context.email,
                         language = request.language,
@@ -113,10 +115,13 @@ class RunnerManager(
                         exitCode = result.codeResponse.exitCode
                     )
                 )
-                logEvent(LogInsertedEvent(context.email))
+                when (result) {
+                    InsertResult.Success -> logEvent(LogInsertedEvent(context.email))
+                    InsertResult.Failure -> logEvent(FailedToInsertLogEvent(context.email))
+                }
             }
 
-            else -> logEvent(FailedToInsertLogEvent(context.email))
+            else -> {}
         }
     }
 }

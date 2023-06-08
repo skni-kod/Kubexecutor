@@ -20,6 +20,7 @@ import org.http4k.security.OAuthProvider
 import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
+import pl.edu.prz.kod.mediator.application.Configuration
 import pl.edu.prz.kod.mediator.domain.ExecutionContext
 import pl.edu.prz.kod.mediator.domain.result.ExecuteRequestResult
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
@@ -30,7 +31,7 @@ class MediatorHttpHandler(
     private val lenses: Lenses,
     private val oAuthProvider: OAuthProvider,
     private val contexts: RequestContexts,
-    private val frontendUrl: String
+    private val configuration: Configuration
 ) {
 
     private val routesContract = routes(
@@ -68,7 +69,7 @@ class MediatorHttpHandler(
         val spec = "/authenticate" bindContract Method.GET
 
         return spec to { _ -> Response(Status.TEMPORARY_REDIRECT)
-            .with(Header.LOCATION of Uri.of(frontendUrl))
+            .with(Header.LOCATION of Uri.of(configuration.frontendHttpUrl))
         }
     }
 
@@ -93,7 +94,7 @@ class MediatorHttpHandler(
 
         fun execute() = { request: Request ->
             val codeRequest = lenses.executeRequestLens.extract(request)
-            val context = ExecutionContext(contexts[request]["email"] ?: "NONE")
+            val context = ExecutionContext(contexts[request]["email"]!!)
             when (val executeRequestResult = runnerManager.execute(codeRequest, context)) {
                 is ExecuteRequestResult.Success ->
                     lenses.executeResponseLens.inject(executeRequestResult.codeResponse, Response(Status.OK))

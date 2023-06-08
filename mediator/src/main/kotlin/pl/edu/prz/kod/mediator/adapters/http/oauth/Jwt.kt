@@ -40,7 +40,7 @@ class Auth0Jwt(private val secret: String) : Jwt {
     override fun verify(token: AccessToken): TokenVerificationResult {
         try {
             val decoded = verifier.verify(token.value)
-            val email = decoded.claims["email"]?.asString() ?: "NONE"
+            val email = decoded.claims["email"]?.asString() ?: return TokenVerificationResult.Failure
             logEvent(TokenVerifiedEvent(email))
             return TokenVerificationResult.Success(email)
         } catch (e: JWTVerificationException) {

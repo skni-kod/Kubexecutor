@@ -16,5 +16,4 @@
     </root>
     <logger name="io.netty" level="off"/>
     <logger name="com.zaxxer" level="info"/>
-    <logger name="com.zaxxer" level="info"/>
 </configuration>

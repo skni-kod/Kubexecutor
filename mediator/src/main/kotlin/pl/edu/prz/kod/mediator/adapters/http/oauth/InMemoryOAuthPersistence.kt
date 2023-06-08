@@ -65,7 +65,7 @@ class InMemoryOAuthPersistence(
         JWT.decode(idToken!!.value)
             .let {
                 val claims = it.claims
-                val email = claims["email"]?.asString() ?: "NONE"
+                val email = claims["email"]!!.asString()
                 val token = jwts.create(
                     subject = it.subject,
                     email = email,
