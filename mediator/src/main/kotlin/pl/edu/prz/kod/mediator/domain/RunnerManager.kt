@@ -1,5 +1,6 @@
 package pl.edu.prz.kod.mediator.domain
 
+import kotlinx.coroutines.runBlocking
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Status
@@ -9,11 +10,10 @@ import pl.edu.prz.kod.common.Lenses
 import pl.edu.prz.kod.common.STATUS_PATH
 import pl.edu.prz.kod.common.adapters.http.dto.CodeRequest
 import pl.edu.prz.kod.common.domain.RunnerStatus
-import pl.edu.prz.kod.mediator.adapters.http.ExceptionEvent
-import pl.edu.prz.kod.mediator.adapters.http.RequestAssignedToRunnerEvent
-import pl.edu.prz.kod.mediator.adapters.http.RunnerReadyEvent
-import pl.edu.prz.kod.mediator.adapters.http.logEvent
+import pl.edu.prz.kod.mediator.adapters.http.*
 import pl.edu.prz.kod.mediator.application.Configuration
+import pl.edu.prz.kod.mediator.domain.result.ExecuteRequestResult
+import pl.edu.prz.kod.mediator.ports.LogRepositoryPort
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -21,8 +21,9 @@ import java.util.concurrent.ConcurrentHashMap
 class RunnerManager(
     private val client: HttpHandler,
     private val configuration: Configuration,
-    private val lenses: Lenses
-) : RunnerManagerPort() {
+    private val lenses: Lenses,
+    private val logRepository: LogRepositoryPort
+) : RunnerManagerPort {
     private val runnersState: ConcurrentHashMap<String, RunnerStatus> = ConcurrentHashMap()
 
     init {
@@ -38,7 +39,7 @@ class RunnerManager(
         }, 0, configuration.runnerStatusQueryPeriod)
     }
 
-    override fun execute(codeRequest: CodeRequest): ExecuteRequestResult =
+    override fun execute(codeRequest: CodeRequest, context: ExecutionContext): ExecuteRequestResult =
         runnersState
             .filterValues { it == RunnerStatus.READY }
             .firstNotNullOfOrNull { it.key }
@@ -47,6 +48,7 @@ class RunnerManager(
                 runnersState[it] = RunnerStatus.EXECUTING
                 val requestResult = sendExecuteRequestToRunner(it, codeRequest)
                 runnersState[it] = RunnerStatus.RESTARTING
+                persistResult(context, codeRequest, requestResult)
                 requestResult
             } ?: ExecuteRequestResult.Failure.NoRunnerAvailable()
 
@@ -98,4 +100,23 @@ class RunnerManager(
         return response.status.successful && lenses.statusResponseLens(response).status == RunnerStatus.READY
     }
 
+    private fun persistResult(context: ExecutionContext, request: CodeRequest, result: ExecuteRequestResult) {
+        when (result) {
+            is ExecuteRequestResult.Success -> runBlocking {
+                logRepository.insertLog(
+                    ExecutionLog(
+                        email = context.email,
+                        language = request.language,
+                        code = request.base64Code,
+                        stdOut = result.codeResponse.stdOut,
+                        stdErr = result.codeResponse.stdErr,
+                        exitCode = result.codeResponse.exitCode
+                    )
+                )
+                logEvent(LogInsertedEvent(context.email))
+            }
+
+            else -> logEvent(FailedToInsertLogEvent(context.email))
+        }
+    }
 }

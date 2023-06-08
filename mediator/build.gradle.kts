@@ -7,6 +7,7 @@ val javaJwtVersion: String by project
 val flywayVersion: String by project
 val postgresqlVersion: String by project
 val hikariVersion: String by project
+val exposedVersion: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -59,7 +60,9 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
-
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 }
 
 tasks.getByName<Test>("test") {

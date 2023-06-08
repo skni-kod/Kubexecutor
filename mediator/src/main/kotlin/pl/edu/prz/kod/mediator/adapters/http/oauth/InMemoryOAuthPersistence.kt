@@ -2,6 +2,7 @@ package pl.edu.prz.kod.mediator.adapters.http.oauth
 
 import com.auth0.jwt.JWT
 import org.http4k.core.Request
+import org.http4k.core.RequestContexts
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.FORBIDDEN
 import org.http4k.core.Uri
@@ -26,6 +27,7 @@ import java.time.Instant
 class InMemoryOAuthPersistence(
     private val clock: Clock,
     private val frontendHttpUrl: String,
+    private val contexts: RequestContexts,
     jwtSecret: String
 ) : OAuthPersistence {
     private val csrfName = "securityServerCsrf"
@@ -41,7 +43,16 @@ class InMemoryOAuthPersistence(
     override fun retrieveOriginalUri(request: Request): Uri? = Uri.of(frontendHttpUrl)
 
     override fun retrieveToken(request: Request) = tryBearerToken(request)
-        ?.takeIf(jwts::verify)
+        ?.takeIf {
+            when (val result = jwts.verify(it)) {
+                is TokenVerificationResult.Success -> {
+                    contexts[request]["email"] = result.email
+                    true
+                }
+
+                is TokenVerificationResult.Failure -> false
+            }
+        }
 
     override fun assignCsrf(redirect: Response, csrf: CrossSiteRequestForgeryToken) =
         redirect.cookie(expiring(csrfName, csrf.value).httpOnly())

@@ -4,7 +4,7 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.format.Jackson
 import pl.edu.prz.kod.common.adapters.http.dto.ErrorResponse
-import pl.edu.prz.kod.mediator.domain.ExecuteRequestResult
+import pl.edu.prz.kod.mediator.domain.result.ExecuteRequestResult
 
 class ErrorHandler {
     private val errorResponseLens = Jackson.autoBody<ErrorResponse>().toLens()

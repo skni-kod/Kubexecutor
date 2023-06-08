@@ -1,4 +1,4 @@
-package pl.edu.prz.kod.mediator.domain
+package pl.edu.prz.kod.mediator.domain.result
 
 import org.http4k.core.Status
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
@@ -9,7 +9,7 @@ sealed class ExecuteRequestResult {
 
     sealed class Failure(val message: String) : ExecuteRequestResult() {
         class NoRunnerAvailable :
-            Failure("There are no available runners currently")
+            Failure("There are currently no runners available")
 
         class NoReplyFromRunner :
             Failure("No reply received from runner")

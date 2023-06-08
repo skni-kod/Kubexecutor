@@ -19,7 +19,8 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
     const editorRef = useRef<EditorType.IStandaloneCodeEditor | null>(null);
     const [language, setLanguage] = useState("nodejs");
     const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null);
-    const [output, setOutput] = useState<{ stdout: string; stdErr: string; exitCode: number } | null>(null);
+    const [output, setOutput] = useState<{ stdOut: string; stdErr: string; exitCode: number } | null>(null);
+    const [error, setError] = useState<{ message: string } | null>(null);
 
     const endpoint = "/api/execute"
     const getValue = async () => {
@@ -42,11 +43,19 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
         } else if (response.status == 200) {
             response.json()
                 .then(data => {
+                    console.log(data)
+                    setOutput(data)
+                    setError(null)
+                });
+        } else if (response.status == 503) {
+            response.json()
+                .then(data => {
                     console.log(data);
-                    setOutput(data);
+                    setOutput(null)
+                    setError(data)
                 });
         }
-    };
+    }
 
     const signIn = async () => {
         const endpoint = "/api/authenticationUrl"
@@ -113,13 +122,20 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
             />
             {output && (
                 <div className="p-4 bg-gray-900 text-white">
-                    <h1>Wynik</h1>
+                    <h1>Result</h1>
                     <h2 className="font-bold">Output:</h2>
-                    <pre className="whitespace-pre-wrap">{output.stdout}</pre>
+                    <pre className="whitespace-pre-wrap">{output.stdOut}</pre>
                     <h2 className="font-bold">Error:</h2>
                     <pre className="whitespace-pre-wrap">{output.stdErr}</pre>
                     <h2 className="font-bold">Exit Code:</h2>
                     <pre className="whitespace-pre-wrap">{output.exitCode}</pre>
+                </div>
+            )}
+            {error && !output && (
+                <div className="p-4 bg-gray-900 text-white">
+                    <h1>Error</h1>
+                    <h2 className="font-bold">Message:</h2>
+                    <pre className="whitespace-pre-wrap">{error.message}</pre>
                 </div>
             )}
         </div>

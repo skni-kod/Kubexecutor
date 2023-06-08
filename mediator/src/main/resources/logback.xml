@@ -15,5 +15,6 @@
         <appender-ref ref="stdout"/>
     </root>
     <logger name="io.netty" level="off"/>
-    <logger name="com.zaxxer" level="debug"/>
+    <logger name="com.zaxxer" level="info"/>
+    <logger name="com.zaxxer" level="info"/>
 </configuration>

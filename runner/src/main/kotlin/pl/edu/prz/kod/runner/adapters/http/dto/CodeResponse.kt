@@ -4,7 +4,7 @@ import pl.edu.prz.kod.runner.domain.ExecutionResult
 import pl.edu.prz.kod.common.adapters.http.dto.CodeResponse
 
 fun ExecutionResult.Success.encode(): CodeResponse = CodeResponse(
-    stdout = stdout,
+    stdOut = stdOut,
     stdErr = stdErr,
     exitCode = exitCode
 )

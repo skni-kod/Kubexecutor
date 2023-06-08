@@ -72,7 +72,7 @@ class RunnerHttpHandler(
             returning(
                 OK,
                 lenses.executeResponseLens to CodeResponse(
-                    stdout = "hello,world!",
+                    stdOut = "hello,world!",
                     stdErr = "",
                     exitCode = 0
                 )
@@ -132,7 +132,7 @@ class RunnerHttpHandler(
             is ExecutionResult.Success -> {
                 logEvent(
                     ExecutionSuccessfulEvent(
-                        stdout = result.stdout,
+                        stdout = result.stdOut,
                         stdErr = result.stdErr,
                         exitCode = result.exitCode
                     )

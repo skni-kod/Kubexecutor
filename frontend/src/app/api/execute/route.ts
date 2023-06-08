@@ -28,5 +28,10 @@ export async function POST(request: NextRequest) {
     } else if (res.status == 200) {
         const response = await res.json();
         return NextResponse.json(response);
+    } else if (res.status == 503) {
+        const response = await res.json();
+        return NextResponse.json(response, {
+            status: 503
+        });
     }
 }

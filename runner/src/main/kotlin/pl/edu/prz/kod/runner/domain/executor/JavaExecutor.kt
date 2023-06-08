@@ -45,7 +45,7 @@ class JavaExecutor(
             return ExecutionResult.Failure.ProcessTimedOutError(configuration.systemCommandTimeout)
         }
         return ExecutionResult.Success(
-                stdout = runProcess.inputStream.bufferedReader().readText(),
+                stdOut = runProcess.inputStream.bufferedReader().readText(),
                 stdErr = runProcess.errorStream.bufferedReader().readText(),
                 exitCode = runProcess.exitValue()
         )
