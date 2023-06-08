@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresdb-persistent-volume
+  namespace: postgres
+  labels:
+    type: local
+    app: postgresdb
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/db"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-persistent-volume-claim
+  namespace: postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresdb
+  namespace: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresdb
+  template:
+    metadata:
+      labels:
+        app: postgresdb
+    spec:
+      containers:
+        - name: postgresdb
+          image: postgres
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: db-secret-credentials
+          volumeMounts:
+            - mountPath: /var/lib/postgres/data
+              name: db-data
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-persistent-volume-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb
+  namespace: postgres
+  labels:
+    app: postgresdb
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+  selector:
+    app: postgresdb
