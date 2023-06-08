@@ -6,3 +6,4 @@ resources:
   - mediator.yaml
   - frontend.yaml
   - network_policy.yaml
+  - postgresql.yaml
