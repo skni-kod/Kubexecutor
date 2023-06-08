@@ -11,9 +11,26 @@ spec:
     - Ingress
   ingress:
     - from:
-      - podSelector:
-          matchLabels:
-            app: mediator
+        - podSelector:
+            matchLabels:
+              app: mediator
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresdb
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mediator
 #---
 # TODO: allow traffic from traefik load balancer pods
 #apiVersion: networking.k8s.io/v1
