@@ -1,6 +1,6 @@
 # Kubexecutor
 
-A code execution sandbox running natively on Kubernetes written in Kotlin. 
+A code execution sandbox running natively on Kubernetes. Written in Kotlin. 
 The project leverages the power of Kubernetes orchestration and the security capabilities
 of Kata containers to create a ~~robust and secure~~(one day) environment for executing untrusted code.
 
