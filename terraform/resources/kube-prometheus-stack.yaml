@@ -1,0 +1,5 @@
+grafana:
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki:3100
