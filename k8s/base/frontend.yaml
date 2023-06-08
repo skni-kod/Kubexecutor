@@ -23,7 +23,7 @@ spec:
           env:
             - name: EXECUTE_ENDPOINT
               value: https://kube.skni.edu.pl:4748/execute
-            - name: AUTHORIZE_ENDPOINT
+            - name: AUTHENTICATE_ENDPOINT
               value: https://kube.skni.edu.pl:4748/authenticate
           securityContext:
             allowPrivilegeEscalation: false

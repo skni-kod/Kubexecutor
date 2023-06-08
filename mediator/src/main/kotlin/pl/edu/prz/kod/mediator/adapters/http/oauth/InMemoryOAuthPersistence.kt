@@ -14,6 +14,8 @@ import org.http4k.security.Nonce
 import org.http4k.security.OAuthCallbackError
 import org.http4k.security.OAuthPersistence
 import org.http4k.security.openid.IdToken
+import pl.edu.prz.kod.mediator.adapters.http.TokenAssignedEvent
+import pl.edu.prz.kod.mediator.adapters.http.logEvent
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -52,15 +54,16 @@ class InMemoryOAuthPersistence(
         JWT.decode(idToken!!.value)
             .let {
                 val claims = it.claims
-                jwts.create(
+                val email = claims["email"]?.asString() ?: "NONE"
+                val token = jwts.create(
                     subject = it.subject,
-                    email = claims["email"]?.asString() ?: "NONE",
+                    email = email,
                     expiresAt = claims["exp"]?.asLong() ?: Instant.MIN.epochSecond
                 )
-            }.let {
-                jwtTokens.add(it!!)
+                jwtTokens.add(token!!)
+                logEvent(TokenAssignedEvent(email = email))
                 redirect
-                    .cookie(expiring(clientAuthCookie, it.value).httpOnly())
+                    .cookie(expiring(clientAuthCookie, token.value).httpOnly())
                     .invalidateCookie(csrfName)
             }
 
