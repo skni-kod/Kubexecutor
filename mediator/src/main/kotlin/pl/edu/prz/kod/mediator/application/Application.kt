@@ -10,6 +10,7 @@ import org.http4k.security.google
 import org.http4k.server.Netty
 import org.http4k.server.asServer
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.createdAtStart
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -21,6 +22,7 @@ import pl.edu.prz.kod.mediator.adapters.http.ErrorHandler
 import pl.edu.prz.kod.mediator.adapters.http.MediatorHttpHandler
 import pl.edu.prz.kod.mediator.adapters.http.logEvent
 import pl.edu.prz.kod.mediator.adapters.http.oauth.InMemoryOAuthPersistence
+import pl.edu.prz.kod.mediator.db.DatabaseFactory
 import pl.edu.prz.kod.mediator.domain.RunnerManager
 import pl.edu.prz.kod.mediator.ports.RunnerManagerPort
 import java.time.Clock
@@ -58,6 +60,7 @@ fun main() {
                         configuration.frontendHttpUrl
                     )
                 }
+                singleOf(::DatabaseFactory) { createdAtStart() }
             }
         )
     }

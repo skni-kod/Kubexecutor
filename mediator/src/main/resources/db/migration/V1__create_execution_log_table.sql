@@ -1,0 +1,10 @@
+CREATE TABLE Logs
+(
+    id   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    email VARCHAR(255) NOT NULL,
+    language VARCHAR NOT NULL,
+    code BYTEA NOT NULL,
+    stdout BYTEA NOT NULL,
+    stderr BYTEA NOT NULL,
+    exitCode INTEGER NOT NULL
+);
