@@ -35,6 +35,13 @@ Source:
 ## Setting up ArgoCD and Grafana/Loki/Promtail stack for monitoring
 1. Run `terraform apply` on a machine which keeps the state of the cluster.
 
+## Accessing Grafana
+
+```shell
+kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
+
+```
+
 ## Accessing ArgoCD
 
 ```shell
