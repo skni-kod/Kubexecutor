@@ -46,6 +46,13 @@ spec:
             capabilities:
               drop:
                 - all
+          resources:
+            requests:
+              cpu: "300m"
+              memory: "400Mi"
+            limits:
+              cpu: "500m"
+              memory: "800Mi"
 ---
 apiVersion: v1
 kind: Service
