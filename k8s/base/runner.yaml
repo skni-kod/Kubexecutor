@@ -47,3 +47,10 @@ spec:
             capabilities:
               drop:
                 - all
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "400Mi"
+            limits:
+              cpu: "300m"
+              memory: "800Mi"
