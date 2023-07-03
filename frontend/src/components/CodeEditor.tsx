@@ -21,7 +21,6 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
     const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null);
     const [output, setOutput] = useState<{ stdOut: string; stdErr: string; exitCode: number } | null>(null);
     const [error, setError] = useState<{ message: string } | null>(null);
-    const [currentText] = useState(typeof window !== "undefined" ? localStorage.getItem("code") || '// Write your code here' : "// Write your code here");
     const endpoint = "/api/execute"
 
     const getValue = async () => {
@@ -116,7 +115,7 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
             <Editor
                 height="70vh"
                 defaultLanguage="javascript"
-                defaultValue={currentText}
+                defaultValue={typeof window !== "undefined" ? localStorage.getItem("code") || '// Write your code here' : "// Write your code here"}
                 theme="vs-dark"
                 onMount={handleEditorDidMount}
                 className="flex-grow"
