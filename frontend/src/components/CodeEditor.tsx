@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from "react";
+import React, {useRef, useState} from "react";
 import Editor, { Monaco } from "@monaco-editor/react";
 import type { editor as EditorType } from "monaco-editor";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
@@ -21,8 +21,8 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
     const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null);
     const [output, setOutput] = useState<{ stdOut: string; stdErr: string; exitCode: number } | null>(null);
     const [error, setError] = useState<{ message: string } | null>(null);
-
     const endpoint = "/api/execute"
+
     const getValue = async () => {
         const base64Code = convertToBase64(editorRef.current?.getValue() || '');
         let response = await fetch(endpoint, {
@@ -115,10 +115,11 @@ const CodeEditor = ({ authToken }: CodeEditorProps) => {
             <Editor
                 height="70vh"
                 defaultLanguage="javascript"
-                defaultValue="// your code here"
+                defaultValue={typeof window !== "undefined" ? localStorage.getItem("code") || '// Write your code here' : "// Write your code here"}
                 theme="vs-dark"
                 onMount={handleEditorDidMount}
                 className="flex-grow"
+                onChange={(value) => localStorage.setItem('code', value || '')}
             />
             {output && (
                 <div className="p-4 bg-gray-900 text-white">
